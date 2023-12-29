@@ -494,14 +494,17 @@ bool ClientNode::read_cart_request()
           cart_request.fleet_name, cart_request.robot_name,
           cart_request.task_id))
   {
-    if (cart_request.cart_mode.mode = messages::CartMode::MODE_PICKUP)
+    if (cart_request.cart_mode.mode == messages::CartMode::MODE_PICKUP)
     {
       ROS_INFO("received a load Cart command, mode: PICKUP");
     }
-    else if (cart_request.cart_mode.mode = messages::CartMode::MODE_DROPOFF)
+    else if (cart_request.cart_mode.mode == messages::CartMode::MODE_DROPOFF)
     {
       ROS_INFO("received a load Cart command, mode: DROPOFF");
     }
+
+    WriteLock task_id_lock(task_id_mutex);
+    current_task_id = cart_request.task_id;
 
     if (paused)
       paused = false;
@@ -516,7 +519,8 @@ void ClientNode::read_requests()
 {
   if (read_mode_request() || 
       read_path_request() || 
-      read_destination_request())
+      read_destination_request() || 
+      read_cart_request())
     return;
 }
 
