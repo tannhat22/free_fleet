@@ -296,6 +296,13 @@ ros2 run ff_examples_ros2 send_mode_request.py -f FLEET_NAME -r ROBOT_NAME -m pa
 ros2 run ff_examples_ros2 send_mode_request.py -f FLEET_NAME -r ROBOT_NAME -m resume -i UNIQUE_TASK_ID
 ```
 
+Cart requests which only supports `pickup` and `dropoff` at the moment,
+
+```bash
+ros2 run ff_examples_ros2 send_cart_request.py -f FLEET_NAME -r ROBOT_NAME -m pickup -x 1.725 -y -0.39 --yaw 0.0 -l LEVEL_NAME -i UNIQUE_TASK_ID
+ros2 run ff_examples_ros2 send_cart_request.py -f FLEET_NAME -r ROBOT_NAME -m dropoff -x 1.725 -y -0.39 --yaw 0.0 -l LEVEL_NAME -i UNIQUE_TASK_ID
+```
+
 **Note** that the task IDs need to be unique, if a request is sent using a previously used task ID, the request will be ignored by the free fleet clients.
 
 </br>
