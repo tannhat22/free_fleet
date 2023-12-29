@@ -488,6 +488,28 @@ bool ClientNode::read_destination_request()
 
 bool ClientNode::read_cart_request()
 {
+  messages::CartRequest cart_request;
+  if (fields.client->read_cart_request(cart_request) &&
+      is_valid_request(
+          cart_request.fleet_name, cart_request.robot_name,
+          cart_request.task_id))
+  {
+    if (cart_request.cart_mode.mode = messages::CartMode::MODE_PICKUP)
+    {
+      ROS_INFO("received a load Cart command, mode: PICKUP");
+    }
+    else if (cart_request.cart_mode.mode = messages::CartMode::MODE_DROPOFF)
+    {
+      ROS_INFO("received a load Cart command, mode: DROPOFF");
+    }
+
+    if (paused)
+      paused = false;
+
+    request_error = false;
+    return true;
+  }
+  return false;
 }
 
 void ClientNode::read_requests()

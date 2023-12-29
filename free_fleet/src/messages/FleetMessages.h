@@ -26,8 +26,9 @@ extern "C" {
 #define FreeFleetData_RobotMode_Constants_MODE_GOING_HOME 6
 #define FreeFleetData_RobotMode_Constants_MODE_DOCKING 7
 #define FreeFleetData_RobotMode_Constants_MODE_REQUEST_ERROR 8
-#define FreeFleetData_CartMode_Constants_MODE_PICKUP 0
-#define FreeFleetData_CartMode_Constants_MODE_DROPOFF 1
+#define FreeFleetData_CartMode_Constants_MODE_IDLE 0
+#define FreeFleetData_CartMode_Constants_MODE_PICKUP 1
+#define FreeFleetData_CartMode_Constants_MODE_DROPOFF 2
 
 
 typedef struct FreeFleetData_RobotMode

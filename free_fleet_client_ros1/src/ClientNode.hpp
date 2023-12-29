@@ -170,7 +170,16 @@ private:
 
   std::string current_task_id;
 
-  struct Goals {
+  struct CartGoal 
+  {
+    follow_waypoints::FollowWaypointsGoal follow_waypoints_path;
+    bool sent = false;
+    uint32_t aborted_count = 0;
+    uint32_t mode = 0;
+  };
+
+  struct WaypointsGoal 
+  {
     follow_waypoints::FollowWaypointsGoal follow_waypoints_path;
     bool sent = false;
     uint32_t aborted_count = 0;
@@ -190,7 +199,10 @@ private:
   std::mutex goal_path_mutex;
 
   std::deque<Goal> goal_path;
-  Goals waypoints_path;
+  WaypointsGoal waypoints_path;
+  
+  std::mutex cart_mode_mutex;
+  CartGoal cart_mode;
 
   void read_requests();
 

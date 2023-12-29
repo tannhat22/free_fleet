@@ -14,8 +14,9 @@ module FreeFleetData
   };
   module CartMode_Constants
   {
-    const unsigned long MODE_PICKUP = 0;
-    const unsigned long MODE_DROPOFF = 1;
+    const unsigned long MODE_IDLE = 0;
+    const unsigned long MODE_PICKUP = 1;
+    const unsigned long MODE_DROPOFF = 2;
   };
   struct RobotMode
   {

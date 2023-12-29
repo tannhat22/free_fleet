@@ -26,6 +26,8 @@ extern "C" {
 #define FreeFleetData_RobotMode_Constants_MODE_GOING_HOME 6
 #define FreeFleetData_RobotMode_Constants_MODE_DOCKING 7
 #define FreeFleetData_RobotMode_Constants_MODE_REQUEST_ERROR 8
+#define FreeFleetData_CartMode_Constants_MODE_PICKUP 0
+#define FreeFleetData_CartMode_Constants_MODE_DROPOFF 1
 
 
 typedef struct FreeFleetData_RobotMode
@@ -40,6 +42,20 @@ extern const dds_topic_descriptor_t FreeFleetData_RobotMode_desc;
 
 #define FreeFleetData_RobotMode_free(d,o) \
 dds_sample_free ((d), &FreeFleetData_RobotMode_desc, (o))
+
+
+typedef struct FreeFleetData_CartMode
+{
+  uint32_t mode;
+} FreeFleetData_CartMode;
+
+extern const dds_topic_descriptor_t FreeFleetData_CartMode_desc;
+
+#define FreeFleetData_CartMode__alloc() \
+((FreeFleetData_CartMode*) dds_alloc (sizeof (FreeFleetData_CartMode)));
+
+#define FreeFleetData_CartMode_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_CartMode_desc, (o))
 
 
 typedef struct FreeFleetData_Location
@@ -196,7 +212,7 @@ typedef struct FreeFleetData_CartRequest
   char * robot_name;
   FreeFleetData_Location destination;
   char * task_id;
-  char * cart_mode;
+  FreeFleetData_CartMode cart_mode;
 } FreeFleetData_CartRequest;
 
 extern const dds_topic_descriptor_t FreeFleetData_CartRequest_desc;

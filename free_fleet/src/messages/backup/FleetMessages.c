@@ -29,6 +29,26 @@ const dds_topic_descriptor_t FreeFleetData_RobotMode_desc =
 };
 
 
+static const uint32_t FreeFleetData_CartMode_ops [] =
+{
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_CartMode, mode),
+  DDS_OP_RTS
+};
+
+const dds_topic_descriptor_t FreeFleetData_CartMode_desc =
+{
+  sizeof (FreeFleetData_CartMode),
+  4u,
+  0u,
+  0u,
+  "FreeFleetData::CartMode",
+  NULL,
+  2,
+  FreeFleetData_CartMode_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"CartMode\"><Member name=\"mode\"><ULong/></Member></Struct></Module></MetaData>"
+};
+
+
 static const uint32_t FreeFleetData_Location_ops [] =
 {
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_Location, sec),
@@ -212,7 +232,7 @@ static const uint32_t FreeFleetData_CartRequest_ops [] =
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_CartRequest, destination.yaw),
   DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CartRequest, destination.level_name),
   DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CartRequest, task_id),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CartRequest, cart_mode),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_CartRequest, cart_mode.mode),
   DDS_OP_RTS
 };
 
@@ -226,5 +246,5 @@ const dds_topic_descriptor_t FreeFleetData_CartRequest_desc =
   NULL,
   11,
   FreeFleetData_CartRequest_ops,
-  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"CartRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"cart_mode\"><String/></Member></Struct></Module></MetaData>"
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"CartMode\"><Member name=\"mode\"><ULong/></Member></Struct><Struct name=\"CartRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"cart_mode\"><Type name=\"CartMode\"/></Member></Struct></Module></MetaData>"
 };

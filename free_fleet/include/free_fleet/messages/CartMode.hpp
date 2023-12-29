@@ -26,8 +26,9 @@ namespace messages {
 struct CartMode
 {
   uint32_t mode;
-  static const uint32_t MODE_PICKUP = 0;
-  static const uint32_t MODE_DROPOFF = 1;
+  static const uint32_t MODE_IDLE = 0;
+  static const uint32_t MODE_PICKUP = 1;
+  static const uint32_t MODE_DROPOFF = 2;
 };
 
 } // namespace messages
