@@ -44,6 +44,8 @@ struct ClientNodeConfig
 
   std::string move_base_server_name = "move_base";
   std::string follow_waypoints_server_name = "follow_waypoints_server";
+  std::string autodock_server_name = "autodock";
+
 
 
   std::string docking_trigger_server_name = "";

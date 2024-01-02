@@ -48,6 +48,7 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
   }
   ROS_INFO("connected with move base action server: %s",
       _config.move_base_server_name.c_str());
+  /////////////////////////////////////////////////////////////
 
   /// Setting up the follow waypoints action client, wait for server
   ROS_INFO("waiting for connection with follow waypoints action server: %s",
@@ -62,6 +63,22 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
   }
   ROS_INFO("connected with follow waypoints action server: %s",
       _config.follow_waypoints_server_name.c_str());
+  /////////////////////////////////////////////////////////////
+
+  /// Setting up the autodock action client, wait for server
+  ROS_INFO("waiting for connection with autodock action server: %s",
+      _config.autodock_server_name.c_str());
+  AutoDockClientSharedPtr autodock_client(
+      new AutoDockClient(_config.autodock_server_name, true));
+  if (!autodock_client->waitForServer(ros::Duration(_config.wait_timeout)))
+  {
+    ROS_ERROR("timed out waiting for action server: %s",
+        _config.autodock_server_name.c_str());
+    return nullptr;
+  }
+  ROS_INFO("connected with autodock action server: %s",
+      _config.autodock_server_name.c_str());
+  /////////////////////////////////////////////////////////////
 
   /// Setting up the docking server client, if required, wait for server
   std::unique_ptr<ros::ServiceClient> docking_trigger_client = nullptr;
@@ -79,11 +96,13 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
       return nullptr;
     }
   }
+  /////////////////////////////////////////////////////////////
 
   client_node->start(Fields{
       std::move(client),
       std::move(move_base_client),
       std::move(follow_waypoints_client),
+      std::move(autodock_client),
       std::move(docking_trigger_client)
   });
 
@@ -306,6 +325,21 @@ follow_waypoints::FollowWaypointsGoal ClientNode::location_to_follow_waypoints_g
   return goal;
 }
 
+follow_waypoints::AutoDockingGoal ClientNode::location_to_autodock_goal(
+      const messages::Location& _location, const messages::CartMode& _mode) const
+{
+  follow_waypoints::AutoDockingGoal goal;
+  goal.dock_pose.header.frame_id = client_node_config.map_frame;
+  goal.dock_pose.header.stamp.sec = _location.sec;
+  goal.dock_pose.header.stamp.nsec = _location.nanosec;
+  goal.dock_pose.pose.position.x = _location.x;
+  goal.dock_pose.pose.position.y = _location.y;
+  goal.dock_pose.pose.position.z = 0.0;
+  goal.dock_pose.pose.orientation = get_quat_from_yaw(_location.yaw);
+  goal.mode = _mode.mode;
+  return goal;
+}
+
 bool ClientNode::read_mode_request()
 {
   messages::ModeRequest mode_request;
@@ -503,6 +537,13 @@ bool ClientNode::read_cart_request()
       ROS_INFO("received a load Cart command, mode: DROPOFF");
     }
 
+    WriteLock cart_goal_lock(cart_goal_mutex);
+    cart_goal.autodock_goal = location_to_autodock_goal(cart_request.destination,
+                                                        cart_request.cart_mode);
+    cart_goal.aborted_count = 0;
+    cart_goal.sent = false;
+    cart_goal.start_docking = true;
+
     WriteLock task_id_lock(task_id_mutex);
     current_task_id = cart_request.task_id;
 
@@ -689,6 +730,68 @@ void ClientNode::handle_requests()
       }
     }
     // otherwise, mode is correct, nothing in queue, nothing else to do then
+  }
+
+  WriteLock cart_goal_lock(cart_goal_mutex);
+  if (cart_goal.start_docking)
+  {
+    if (!cart_goal.sent)
+    {
+      ROS_INFO("sending autodock goal.");
+      fields.autodock_client->sendGoal(cart_goal.autodock_goal);
+      // goal_path.front().sent = true;
+      cart_goal.sent = true;
+      return;
+    }
+
+    // Goals have been sent, check the goal states now
+    GoalState current_goal_state = fields.autodock_client->getState();
+    if (current_goal_state == GoalState::SUCCEEDED)
+    {
+      ROS_INFO("Autodock goal state: SUCCEEEDED.");
+      cart_goal.start_docking = false;
+      return;
+    }
+    else if (current_goal_state == GoalState::ACTIVE)
+    {
+      return;
+    }
+    else if (current_goal_state == GoalState::ABORTED)
+    {
+      cart_goal.aborted_count++;
+
+      // TODO: parameterize the maximum number of retries.
+      if (cart_goal.aborted_count < 3)
+      {
+        ROS_INFO("robot's autodock has aborted the current goal %d "
+            "times, client will trying again...",
+            cart_goal.aborted_count);
+        fields.autodock_client->cancelGoal();
+        cart_goal.sent = false;
+        return;
+      }
+      else
+      {
+        ROS_INFO("robot's autodock has aborted the current goal %d "
+            "times, please check that there is nothing in the way of the "
+            "robot, client will abort the current docking request, and await "
+            "further requests.",
+            cart_goal.aborted_count);
+        fields.autodock_client->cancelGoal();
+        cart_goal.start_docking = false;
+        return;
+      }
+    }
+    else
+    {
+      ROS_INFO("Undesirable goal state: %s",
+          current_goal_state.toString().c_str());
+      ROS_INFO("Client will abort the current docking request, and await further "
+          "requests or manual intervention.");
+      fields.autodock_client->cancelGoal();
+      cart_goal.start_docking = false;
+      return;
+    }
   }
 }
 

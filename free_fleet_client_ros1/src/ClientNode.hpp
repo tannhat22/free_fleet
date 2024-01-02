@@ -32,6 +32,8 @@
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
 
+#include <follow_waypoints/AutoDockingGoal.h>
+#include <follow_waypoints/AutoDockingAction.h>
 #include <follow_waypoints/FollowWaypointsGoal.h>
 #include <follow_waypoints/FollowWaypointsAction.h>
 #include <move_base_msgs/MoveBaseGoal.h>
@@ -56,6 +58,10 @@ public:
   using ReadLock = std::unique_lock<std::mutex>;
   using WriteLock = std::unique_lock<std::mutex>;
 
+  using AutoDockClient = 
+      actionlib::SimpleActionClient<follow_waypoints::AutoDockingAction>;
+  using AutoDockClientSharedPtr = std::shared_ptr<AutoDockClient>;
+
   using FollowWaypointsClient = 
       actionlib::SimpleActionClient<follow_waypoints::FollowWaypointsAction>;
   using FollowWaypointsClientSharedPtr = std::shared_ptr<FollowWaypointsClient>;
@@ -79,6 +85,9 @@ public:
 
     /// follow waypoints action client
     FollowWaypointsClientSharedPtr follow_waypoints_client;
+
+    /// autodock action client
+    AutoDockClientSharedPtr autodock_client;
 
     /// Docking server client
     std::unique_ptr<ros::ServiceClient> docking_trigger_client;
@@ -166,16 +175,19 @@ private:
   follow_waypoints::FollowWaypointsGoal location_to_follow_waypoints_goal(
       const std::vector<messages::Location>& locations) const;
 
+  follow_waypoints::AutoDockingGoal location_to_autodock_goal(
+      const messages::Location& locations, const messages::CartMode& _mode) const;
+
   std::mutex task_id_mutex;
 
   std::string current_task_id;
 
   struct CartGoal 
   {
-    follow_waypoints::FollowWaypointsGoal follow_waypoints_path;
+    follow_waypoints::AutoDockingGoal autodock_goal;
+    bool start_docking = false;
     bool sent = false;
     uint32_t aborted_count = 0;
-    uint32_t mode = 0;
   };
 
   struct WaypointsGoal 
@@ -201,8 +213,8 @@ private:
   std::deque<Goal> goal_path;
   WaypointsGoal waypoints_path;
   
-  std::mutex cart_mode_mutex;
-  CartGoal cart_mode;
+  std::mutex cart_goal_mutex;
+  CartGoal cart_goal;
 
   void read_requests();
 

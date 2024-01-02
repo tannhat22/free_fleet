@@ -79,6 +79,7 @@ void ClientNodeConfig::print_config() const
   printf("    battery state: %s\n", battery_state_topic.c_str());
   printf("    move base server: %s\n", move_base_server_name.c_str());
   printf("    follow waypoints server: %s\n", follow_waypoints_server_name.c_str());
+  printf("    autodock server: %s\n", autodock_server_name.c_str());
   printf("    docking trigger server: %s\n", docking_trigger_server_name.c_str());
   printf("  ROBOT FRAMES\n");
   printf("    map frame: %s\n", map_frame.c_str());
@@ -128,6 +129,8 @@ ClientNodeConfig ClientNodeConfig::make()
       node_private_ns, "move_base_server_name", config.move_base_server_name);
   config.get_param_if_available(
       node_private_ns, "follow_waypoints_server_name", config.follow_waypoints_server_name);
+  config.get_param_if_available(
+      node_private_ns, "autodock_server_name", config.autodock_server_name);
   config.get_param_if_available(
       node_private_ns, "docking_trigger_server_name", config.docking_trigger_server_name);
   config.get_param_if_available(
