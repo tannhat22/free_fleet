@@ -20,7 +20,7 @@
     <param name="fleet_name" value="turtlebot3"/>
     <param name="robot_name" value="ros2_tb3_0"/>
     <param name="robot_model" value="turtlebot3"/>
-    <param name="level_name" value="turtlebot_world"/>
+    <param name="level_name" value="L1"/>
     <param name="dds_domain" value="42"/>
     <param name="max_dist_to_first_waypoint" value="10.0"/>
     <param name="map_frame" value="map"/>

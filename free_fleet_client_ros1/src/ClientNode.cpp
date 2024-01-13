@@ -74,7 +74,7 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
   {
     ROS_ERROR("timed out waiting for action server: %s",
         _config.autodock_server_name.c_str());
-    return nullptr;
+    // return nullptr;
   }
   ROS_INFO("connected with autodock action server: %s",
       _config.autodock_server_name.c_str());

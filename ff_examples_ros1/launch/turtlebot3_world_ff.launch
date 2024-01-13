@@ -3,8 +3,8 @@
   <arg name="map_file" default="$(find ff_examples_ros1)/maps/world.yaml"/>
   <arg name="open_rviz" default="true"/>
   <arg name="move_forward_only" default="false"/>
-  <arg name="initial_pose_x" default="-1.8949996233"/>
-  <arg name="initial_pose_y" default="-0.419999837875"/>
+  <arg name="initial_pose_x" default="8.07174"/>
+  <arg name="initial_pose_y" default="9.47396"/>
   <arg name="initial_pose_a" default="-0.0208304"/>
 
   <!-- launches the basic turtlebot3 world with one basic turtlebot -->
@@ -57,10 +57,10 @@
       type="free_fleet_client_ros1" output="screen">
     <param name="fleet_name" type="string" value="turtlebot3"/>
     <param name="robot_name" type="string" value="ros1_tb3_0"/>
-    <param name="level_name" type="string" value="turtlebot_world"/>
+    <param name="level_name" type="string" value="L1"/>
     <param name="wait_timeout" type="double" value="10.0"/>
     <param name="update_frequency" type="double" value="10.0"/>
-    <param name="publish_frequency" type="double" value="1.0"/>
+    <param name="publish_frequency" type="double" value="5.0"/>
     <param name="dds_domain" type="int" value="42"/>dds_state_topic
     <param name="dds_state_topic" type="string" value="robot_state"/>
     <param name="dds_mode_request_topic" type="string" value="mode_request"/>
