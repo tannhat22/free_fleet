@@ -42,6 +42,7 @@
     </group>
   </group>
 
+  <!-- Follow waypoints -->
   <node name="follow_waypoints" pkg="follow_waypoints"
       type="follow_waypoints_server.py" output="screen">
     <param name="map_frame" value="map"/>
@@ -50,6 +51,11 @@
     <param name="action_name" value="/follow_waypoints_server"/>
     <param name="find_closest_point" value="False"/>
     <param name="update_frequency" value="5.0"/>
+  </node>
+
+  <!-- Fake battery -->
+  <node name="fake_battery" pkg="follow_waypoints"
+      type="fake_battery.py" output="screen">
   </node>
 
   <!-- launch the free fleet client first -->

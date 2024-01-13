@@ -454,8 +454,8 @@ bool ClientNode::read_path_request()
     goal_path.clear();
     for (size_t i = 0; i < path_request.path.size(); ++i)
     {
-      waypoint_sec += path_request.path[i].sec;
-      waypoint_nanosec += path_request.path[i].nanosec;
+      waypoint_sec = path_request.path[i].sec;
+      waypoint_nanosec = path_request.path[i].nanosec;
 
       goal_path.push_back(
           Goal {
