@@ -141,6 +141,8 @@ private:
   std::atomic<bool> request_error;
   std::atomic<bool> emergency;
   std::atomic<bool> paused;
+  std::atomic<bool> docking;
+
 
   messages::RobotMode get_robot_mode();
 

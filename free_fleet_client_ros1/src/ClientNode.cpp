@@ -193,6 +193,10 @@ messages::RobotMode ClientNode::get_robot_mode()
   if (emergency)
     return messages::RobotMode{messages::RobotMode::MODE_EMERGENCY};
 
+  /// Checks if robot is docking:
+  if (docking)
+    return messages::RobotMode{messages::RobotMode::MODE_DOCKING};
+
   /// Checks if robot is charging
   {
     ReadLock battery_state_lock(battery_state_mutex);
@@ -200,7 +204,7 @@ messages::RobotMode ClientNode::get_robot_mode()
     if (current_battery_state.power_supply_status ==
         current_battery_state.POWER_SUPPLY_STATUS_CHARGING)
       return messages::RobotMode{messages::RobotMode::MODE_CHARGING};
-  }
+  }  
 
   /// Checks if robot is moving
   {
@@ -593,7 +597,9 @@ void ClientNode::handle_requests()
       if (current_goal_state == GoalState::SUCCEEDED)
       {
         ROS_INFO("Waypoints goal state: SUCCEEEDED.");
-
+        goal_path.clear();
+        reset_waypoints_path();
+        return;
         // By some stroke of good fortune, we may have arrived at our goal
         // earlier than we were scheduled to reach it. If that is the case,
         // we need to wait here until it's time to proceed.
@@ -735,6 +741,14 @@ void ClientNode::handle_requests()
   WriteLock cart_goal_lock(cart_goal_mutex);
   if (cart_goal.start_docking)
   {
+    if (!docking)
+      docking = true;
+
+    // ROS_WARN("Sending autodock goal.");
+    // cart_goal.start_docking = false;
+    // docking = false;
+    // return;
+
     if (!cart_goal.sent)
     {
       ROS_INFO("sending autodock goal.");
@@ -750,6 +764,7 @@ void ClientNode::handle_requests()
     {
       ROS_INFO("Autodock goal state: SUCCEEEDED.");
       cart_goal.start_docking = false;
+      docking = false;
       return;
     }
     else if (current_goal_state == GoalState::ACTIVE)
@@ -779,6 +794,7 @@ void ClientNode::handle_requests()
             cart_goal.aborted_count);
         fields.autodock_client->cancelGoal();
         cart_goal.start_docking = false;
+        docking = false;
         return;
       }
     }
@@ -790,6 +806,7 @@ void ClientNode::handle_requests()
           "requests or manual intervention.");
       fields.autodock_client->cancelGoal();
       cart_goal.start_docking = false;
+      docking = false;
       return;
     }
   }
