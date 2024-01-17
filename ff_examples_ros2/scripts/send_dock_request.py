@@ -84,14 +84,18 @@ def main(argv = sys.argv):
     msg.destination.level_name = args.level_name
     
     if args.mode == 'mode':
-        print('Please insert desired mode, pickup or dropoff')
+        print('Please insert desired mode: charge, pickup, dropoff or undock')
         return
+    elif args.mode == 'charge':
+        msg.dock_mode.mode = DockMode.MODE_CHARGE 
     elif args.mode == 'pickup':
         msg.dock_mode.mode = DockMode.MODE_PICKUP
     elif args.mode == 'dropoff':
         msg.dock_mode.mode = DockMode.MODE_DROPOFF
+    elif args.mode == 'undock':
+        msg.dock_mode.mode = DockMode.MODE_UNDOCK
     else:
-        print('unrecognized mode requested, only use pickup or dropoff please')
+        print('unrecognized mode requested, only use charge, pickup, dropoff or undock please')
         return
   
     rclpy.spin_once(node, timeout_sec=1.0)
