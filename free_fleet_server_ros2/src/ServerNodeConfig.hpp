@@ -34,14 +34,14 @@ struct ServerNodeConfig
   std::string mode_request_topic = "mode_request";
   std::string path_request_topic = "path_request";
   std::string destination_request_topic = "destination_request";
-  std::string cart_request_topic = "cart_request";
+  std::string dock_request_topic = "dock_request";
 
   int dds_domain = 42;
   std::string dds_robot_state_topic = "robot_state";
   std::string dds_mode_request_topic = "mode_request";
   std::string dds_path_request_topic = "path_request";
   std::string dds_destination_request_topic = "destination_request";
-  std::string dds_cart_request_topic = "cart_request";
+  std::string dds_dock_request_topic = "dock_request";
 
   double update_state_frequency = 10.0;
   double publish_state_frequency = 10.0;

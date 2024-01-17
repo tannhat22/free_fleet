@@ -20,13 +20,13 @@
 
 #include <free_fleet/messages/Location.hpp>
 #include <free_fleet/messages/RobotMode.hpp>
-#include <free_fleet/messages/CartMode.hpp>
+#include <free_fleet/messages/DockMode.hpp>
 #include <free_fleet/messages/RobotState.hpp>
 #include <free_fleet/messages/ModeParameter.hpp>
 #include <free_fleet/messages/ModeRequest.hpp>
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
-#include <free_fleet/messages/CartRequest.hpp>
+#include <free_fleet/messages/DockRequest.hpp>
 
 
 #include "FleetMessages.h"
@@ -38,9 +38,9 @@ void convert(const RobotMode& _input, FreeFleetData_RobotMode& _output);
 
 void convert(const FreeFleetData_RobotMode& _input, RobotMode& _output);
 
-void convert(const CartMode& _input, FreeFleetData_CartMode& _output);
+void convert(const DockMode& _input, FreeFleetData_DockMode& _output);
 
-void convert(const FreeFleetData_CartMode& _input, CartMode& _output);
+void convert(const FreeFleetData_DockMode& _input, DockMode& _output);
 
 void convert(const Location& _input, FreeFleetData_Location& _output);
 
@@ -71,12 +71,12 @@ void convert(
     DestinationRequest& _output);
 
 void convert(
-    const CartRequest& _input, 
-    FreeFleetData_CartRequest& _output);
+    const DockRequest& _input, 
+    FreeFleetData_DockRequest& _output);
 
 void convert(
-    const FreeFleetData_CartRequest& _input,
-    CartRequest& _output);
+    const FreeFleetData_DockRequest& _input,
+    DockRequest& _output);
 
 } // namespace 
 } // namespace free_fleet

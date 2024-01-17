@@ -84,13 +84,13 @@ bool Client::ClientImpl::read_destination_request(
   return false;
 }
 
-bool Client::ClientImpl::read_cart_request(
-    messages::CartRequest& _cart_request)
+bool Client::ClientImpl::read_dock_request(
+    messages::DockRequest& _dock_request)
 {
-  auto cart_requests = fields.cart_request_sub->read();
-  if (!cart_requests.empty())
+  auto dock_requests = fields.dock_request_sub->read();
+  if (!dock_requests.empty())
   {
-    convert(*(cart_requests[0]), _cart_request);
+    convert(*(dock_requests[0]), _dock_request);
     return true;
   }
   return false;

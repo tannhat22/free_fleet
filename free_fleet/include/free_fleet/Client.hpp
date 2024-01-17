@@ -26,7 +26,7 @@
 #include <free_fleet/messages/ModeRequest.hpp>
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
-#include <free_fleet/messages/CartRequest.hpp>
+#include <free_fleet/messages/DockRequest.hpp>
 
 namespace free_fleet {
 
@@ -85,16 +85,16 @@ public:
   bool read_destination_request(
       messages::DestinationRequest& destination_request);
 
-  /// Attempts to read and receive a new cart request from the free
+  /// Attempts to read and receive a new dock request from the free
   /// fleet server, for commanding the robot client.
   /// 
-  /// \param[out] cart_request
-  ///   Newly received robot cart request from the free fleet server,
+  /// \param[out] dock_request
+  ///   Newly received robot dock request from the free fleet server,
   ///   to be handled by the robot client.
   /// \return
-  ///   True if a new cart request was received, false otherwise.
-  bool read_cart_request(
-      messages::CartRequest& cart_request);
+  ///   True if a new dock request was received, false otherwise.
+  bool read_dock_request(
+      messages::DockRequest& dock_request);
 
   /// Destructor
   ~Client();

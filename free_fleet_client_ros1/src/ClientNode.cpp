@@ -330,7 +330,7 @@ follow_waypoints::FollowWaypointsGoal ClientNode::location_to_follow_waypoints_g
 }
 
 follow_waypoints::AutoDockingGoal ClientNode::location_to_autodock_goal(
-      const messages::Location& _location, const messages::CartMode& _mode) const
+      const messages::Location& _location, const messages::DockMode& _mode) const
 {
   follow_waypoints::AutoDockingGoal goal;
   goal.dock_pose.header.frame_id = client_node_config.map_frame;
@@ -524,32 +524,32 @@ bool ClientNode::read_destination_request()
   return false;
 }
 
-bool ClientNode::read_cart_request()
+bool ClientNode::read_dock_request()
 {
-  messages::CartRequest cart_request;
-  if (fields.client->read_cart_request(cart_request) &&
+  messages::DockRequest dock_request;
+  if (fields.client->read_dock_request(dock_request) &&
       is_valid_request(
-          cart_request.fleet_name, cart_request.robot_name,
-          cart_request.task_id))
+          dock_request.fleet_name, dock_request.robot_name,
+          dock_request.task_id))
   {
-    if (cart_request.cart_mode.mode == messages::CartMode::MODE_PICKUP)
+    if (dock_request.dock_mode.mode == messages::DockMode::MODE_PICKUP)
     {
-      ROS_INFO("received a load Cart command, mode: PICKUP");
+      ROS_INFO("received Dock command, mode: PICKUP");
     }
-    else if (cart_request.cart_mode.mode == messages::CartMode::MODE_DROPOFF)
+    else if (dock_request.dock_mode.mode == messages::DockMode::MODE_DROPOFF)
     {
-      ROS_INFO("received a load Cart command, mode: DROPOFF");
+      ROS_INFO("received Dock command, mode: DROPOFF");
     }
 
-    WriteLock cart_goal_lock(cart_goal_mutex);
-    cart_goal.autodock_goal = location_to_autodock_goal(cart_request.destination,
-                                                        cart_request.cart_mode);
-    cart_goal.aborted_count = 0;
-    cart_goal.sent = false;
-    cart_goal.start_docking = true;
+    WriteLock dock_goal_lock(dock_goal_mutex);
+    dock_goal.autodock_goal = location_to_autodock_goal(dock_request.destination,
+                                                        dock_request.dock_mode);
+    dock_goal.aborted_count = 0;
+    dock_goal.sent = false;
+    dock_goal.start_docking = true;
 
     WriteLock task_id_lock(task_id_mutex);
-    current_task_id = cart_request.task_id;
+    current_task_id = dock_request.task_id;
 
     if (paused)
       paused = false;
@@ -565,7 +565,7 @@ void ClientNode::read_requests()
   if (read_mode_request() || 
       read_path_request() || 
       read_destination_request() || 
-      read_cart_request())
+      read_dock_request())
     return;
 }
 
@@ -738,23 +738,23 @@ void ClientNode::handle_requests()
     // otherwise, mode is correct, nothing in queue, nothing else to do then
   }
 
-  WriteLock cart_goal_lock(cart_goal_mutex);
-  if (cart_goal.start_docking)
+  WriteLock dock_goal_lock(dock_goal_mutex);
+  if (dock_goal.start_docking)
   {
     if (!docking)
       docking = true;
 
     // ROS_WARN("Sending autodock goal.");
-    // cart_goal.start_docking = false;
+    // dock_goal.start_docking = false;
     // docking = false;
     // return;
 
-    if (!cart_goal.sent)
+    if (!dock_goal.sent)
     {
       ROS_INFO("sending autodock goal.");
-      fields.autodock_client->sendGoal(cart_goal.autodock_goal);
+      fields.autodock_client->sendGoal(dock_goal.autodock_goal);
       // goal_path.front().sent = true;
-      cart_goal.sent = true;
+      dock_goal.sent = true;
       return;
     }
 
@@ -763,7 +763,7 @@ void ClientNode::handle_requests()
     if (current_goal_state == GoalState::SUCCEEDED)
     {
       ROS_INFO("Autodock goal state: SUCCEEEDED.");
-      cart_goal.start_docking = false;
+      dock_goal.start_docking = false;
       docking = false;
       return;
     }
@@ -773,16 +773,16 @@ void ClientNode::handle_requests()
     }
     else if (current_goal_state == GoalState::ABORTED)
     {
-      cart_goal.aborted_count++;
+      dock_goal.aborted_count++;
 
       // TODO: parameterize the maximum number of retries.
-      if (cart_goal.aborted_count < 3)
+      if (dock_goal.aborted_count < 3)
       {
         ROS_INFO("robot's autodock has aborted the current goal %d "
             "times, client will trying again...",
-            cart_goal.aborted_count);
+            dock_goal.aborted_count);
         fields.autodock_client->cancelGoal();
-        cart_goal.sent = false;
+        dock_goal.sent = false;
         return;
       }
       else
@@ -791,9 +791,9 @@ void ClientNode::handle_requests()
             "times, please check that there is nothing in the way of the "
             "robot, client will abort the current docking request, and await "
             "further requests.",
-            cart_goal.aborted_count);
+            dock_goal.aborted_count);
         fields.autodock_client->cancelGoal();
-        cart_goal.start_docking = false;
+        dock_goal.start_docking = false;
         docking = false;
         return;
       }
@@ -805,7 +805,7 @@ void ClientNode::handle_requests()
       ROS_INFO("Client will abort the current docking request, and await further "
           "requests or manual intervention.");
       fields.autodock_client->cancelGoal();
-      cart_goal.start_docking = false;
+      dock_goal.start_docking = false;
       docking = false;
       return;
     }

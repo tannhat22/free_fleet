@@ -62,17 +62,17 @@ Client::SharedPtr Client::make(const ClientConfig& _config)
               participant, &FreeFleetData_DestinationRequest_desc,
               _config.dds_destination_request_topic));
 
-  dds::DDSSubscribeHandler<FreeFleetData_CartRequest>::SharedPtr
-      cart_request_sub(
-          new dds::DDSSubscribeHandler<FreeFleetData_CartRequest>(
-              participant, &FreeFleetData_CartRequest_desc,
-              _config.dds_cart_request_topic));
+  dds::DDSSubscribeHandler<FreeFleetData_DockRequest>::SharedPtr
+      dock_request_sub(
+          new dds::DDSSubscribeHandler<FreeFleetData_DockRequest>(
+              participant, &FreeFleetData_DockRequest_desc,
+              _config.dds_dock_request_topic));
 
   if (!state_pub->is_ready() ||
       !mode_request_sub->is_ready() ||
       !path_request_sub->is_ready() ||
       !destination_request_sub->is_ready() ||
-      !cart_request_sub->is_ready())
+      !dock_request_sub->is_ready())
     return nullptr;
 
   client->impl->start(ClientImpl::Fields{
@@ -81,7 +81,7 @@ Client::SharedPtr Client::make(const ClientConfig& _config)
       std::move(mode_request_sub),
       std::move(path_request_sub),
       std::move(destination_request_sub),
-      std::move(cart_request_sub)});
+      std::move(dock_request_sub)});
   return client;
 }
 
@@ -114,10 +114,10 @@ bool Client::read_destination_request(
   return impl->read_destination_request(_destination_request);
 }
 
-bool Client::read_cart_request(
-    messages::CartRequest& _cart_request)
+bool Client::read_dock_request(
+    messages::DockRequest& _dock_request)
 {
-  return impl->read_cart_request(_cart_request);
+  return impl->read_dock_request(_dock_request);
 }
 
 } // namespace free_fleet

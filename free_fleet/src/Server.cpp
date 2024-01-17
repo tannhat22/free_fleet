@@ -62,17 +62,17 @@ Server::SharedPtr Server::make(const ServerConfig& _config)
               participant, &FreeFleetData_DestinationRequest_desc,
               _config.dds_destination_request_topic));
 
-  dds::DDSPublishHandler<FreeFleetData_CartRequest>::SharedPtr 
-      cart_request_pub(
-          new dds::DDSPublishHandler<FreeFleetData_CartRequest>(
-              participant, &FreeFleetData_CartRequest_desc,
-              _config.dds_cart_request_topic));
+  dds::DDSPublishHandler<FreeFleetData_DockRequest>::SharedPtr 
+      dock_request_pub(
+          new dds::DDSPublishHandler<FreeFleetData_DockRequest>(
+              participant, &FreeFleetData_DockRequest_desc,
+              _config.dds_dock_request_topic));
 
   if (!state_sub->is_ready() ||
       !mode_request_pub->is_ready() ||
       !path_request_pub->is_ready() ||
       !destination_request_pub->is_ready() ||
-      !cart_request_pub->is_ready())
+      !dock_request_pub->is_ready())
     return nullptr;
 
   server->impl->start(ServerImpl::Fields{
@@ -81,7 +81,7 @@ Server::SharedPtr Server::make(const ServerConfig& _config)
       std::move(mode_request_pub),
       std::move(path_request_pub),
       std::move(destination_request_pub),
-      std::move(cart_request_pub)});
+      std::move(dock_request_pub)});
   return server;
 }
 
@@ -115,10 +115,10 @@ bool Server::send_destination_request(
   return impl->send_destination_request(_destination_request);
 }
 
-bool Server::send_cart_request(
-    const messages::CartRequest& _cart_request)
+bool Server::send_dock_request(
+    const messages::DockRequest& _dock_request)
 {
-  return impl->send_cart_request(_cart_request);
+  return impl->send_dock_request(_dock_request);
 }
 
 } // namespace free_fleet

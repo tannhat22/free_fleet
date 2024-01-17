@@ -22,7 +22,7 @@
 #include <free_fleet/messages/ModeRequest.hpp>
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
-#include <free_fleet/messages/CartRequest.hpp>
+#include <free_fleet/messages/DockRequest.hpp>
 #include <free_fleet/Server.hpp>
 #include <free_fleet/ServerConfig.hpp>
 
@@ -60,9 +60,9 @@ public:
     dds::DDSPublishHandler<FreeFleetData_DestinationRequest>::SharedPtr
         destination_request_pub;
 
-    /// DDS publisher for cart requests to be sent to clients
-    dds::DDSPublishHandler<FreeFleetData_CartRequest>::SharedPtr
-        cart_request_pub;
+    /// DDS publisher for dock requests to be sent to clients
+    dds::DDSPublishHandler<FreeFleetData_DockRequest>::SharedPtr
+        dock_request_pub;
   };
 
   ServerImpl(const ServerConfig& config);
@@ -79,7 +79,7 @@ public:
 
   bool send_destination_request(const messages::DestinationRequest& destination_request);
 
-  bool send_cart_request(const messages::CartRequest& cart_request);
+  bool send_dock_request(const messages::DockRequest& dock_request);
 
 private:
 

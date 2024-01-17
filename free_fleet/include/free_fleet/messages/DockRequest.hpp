@@ -15,23 +15,25 @@
  *
  */
 
-#ifndef FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__CARTMODE_HPP
-#define FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__CARTMODE_HPP
+#ifndef FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__DOCKREQUEST_HPP
+#define FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__DOCKREQUEST_HPP
 
-#include <cstdint>
+#include "Location.hpp"
+#include "DockMode.hpp"
 
 namespace free_fleet {
 namespace messages {
 
-struct CartMode
+struct DockRequest
 {
-  uint32_t mode;
-  static const uint32_t MODE_IDLE = 0;
-  static const uint32_t MODE_PICKUP = 1;
-  static const uint32_t MODE_DROPOFF = 2;
+  std::string fleet_name;
+  std::string robot_name;
+  Location destination;
+  std::string task_id;
+  DockMode dock_mode;
 };
 
 } // namespace messages
 } // namespace free_fleet
 
-#endif // FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__CARTMODE_HPP
+#endif // FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__DOCKREQUEST_HPP

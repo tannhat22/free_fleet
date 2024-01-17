@@ -30,7 +30,7 @@ void ClientConfig::print_config() const
   printf("    mode request: %s\n", dds_mode_request_topic.c_str());
   printf("    path request: %s\n", dds_path_request_topic.c_str());
   printf("    destination request: %s\n", dds_destination_request_topic.c_str());
-  printf("    cart request: %s\n", dds_cart_request_topic.c_str());
+  printf("    dock request: %s\n", dds_dock_request_topic.c_str());
 }
 
 } // namespace free_fleet

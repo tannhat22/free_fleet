@@ -27,7 +27,7 @@
 #include <free_fleet/messages/ModeRequest.hpp>
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
-#include <free_fleet/messages/CartRequest.hpp>
+#include <free_fleet/messages/DockRequest.hpp>
 
 namespace free_fleet {
 
@@ -83,15 +83,15 @@ public:
   bool send_destination_request(
       const messages::DestinationRequest& destination_request);
 
-  /// Attempts to send a new cart request to all the clients. Clients 
+  /// Attempts to send a new dock request to all the clients. Clients 
   /// are in charge to identify if requests are targetted towards them.
   ///
-  /// \param[in] cart_request
-  ///   New cart request to be sent out to the clients.
+  /// \param[in] dock_request
+  ///   New dock request to be sent out to the clients.
   /// \return
-  ///   True if the cart request was successfully sent, false otherwise.
-  bool send_cart_request(
-      const messages::CartRequest& cart_request);
+  ///   True if the dock request was successfully sent, false otherwise.
+  bool send_dock_request(
+      const messages::DockRequest& dock_request);
 
   /// Destructor
   ~Server();

@@ -20,13 +20,13 @@ import argparse
 import rclpy
 from rclpy.node import Node
 
-from rmf_fleet_msgs.msg import CartMode
-from rmf_fleet_msgs.msg import CartRequest
+from rmf_fleet_msgs.msg import DockMode
+from rmf_fleet_msgs.msg import DockRequest
 
 
 def main(argv = sys.argv):
     '''
-    Example cart request:
+    Example dock request:
     - fleet_name: magni
     - robot_name: magni123
     - task_id: 6tyghb4edujrefyd
@@ -34,7 +34,7 @@ def main(argv = sys.argv):
     - y: 0.0
     - yaw: 0.0
     - level_name: B1
-    - cart_mode.mode: PICKUP
+    - dock_mode.mode: PICKUP
     '''
 
     default_fleet_name = 'fleet_name'
@@ -45,7 +45,7 @@ def main(argv = sys.argv):
     default_desired_yaw = 0.0
     default_level_name = 'B1'
     default_mode = 'mode'
-    default_topic_name = 'robot_cart_requests'
+    default_topic_name = 'robot_dock_requests'
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--fleet-name', default=default_fleet_name)
@@ -70,10 +70,10 @@ def main(argv = sys.argv):
     print('topic_name: {}'.format(args.topic_name))
 
     rclpy.init()
-    node = rclpy.create_node('send_cart_request_node')
-    pub = node.create_publisher(CartRequest, args.topic_name, 10)
+    node = rclpy.create_node('send_dock_request_node')
+    pub = node.create_publisher(DockRequest, args.topic_name, 10)
 
-    msg = CartRequest()
+    msg = DockRequest()
     msg.fleet_name = args.fleet_name
     msg.robot_name = args.robot_name
     msg.task_id = args.task_id
@@ -87,9 +87,9 @@ def main(argv = sys.argv):
         print('Please insert desired mode, pickup or dropoff')
         return
     elif args.mode == 'pickup':
-        msg.cart_mode.mode = CartMode.MODE_PICKUP
+        msg.dock_mode.mode = DockMode.MODE_PICKUP
     elif args.mode == 'dropoff':
-        msg.cart_mode.mode = CartMode.MODE_DROPOFF
+        msg.dock_mode.mode = DockMode.MODE_DROPOFF
     else:
         print('unrecognized mode requested, only use pickup or dropoff please')
         return

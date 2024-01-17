@@ -25,7 +25,7 @@
 #include <free_fleet/messages/ModeRequest.hpp>
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
-#include <free_fleet/messages/CartRequest.hpp>
+#include <free_fleet/messages/DockRequest.hpp>
 
 #include "utilities.hpp"
 #include "ServerNode.hpp"
@@ -106,8 +106,8 @@ void ServerNode::setup_config()
       "destination_request_topic",
       server_node_config.destination_request_topic);
   get_parameter(
-      "cart_request_topic",
-      server_node_config.cart_request_topic);
+      "dock_request_topic",
+      server_node_config.dock_request_topic);
   get_parameter("dds_domain", server_node_config.dds_domain);
   get_parameter("dds_robot_state_topic",
       server_node_config.dds_robot_state_topic);
@@ -119,8 +119,8 @@ void ServerNode::setup_config()
       "dds_destination_request_topic",
       server_node_config.dds_destination_request_topic);
   get_parameter(
-      "dds_cart_request_topic",
-      server_node_config.dds_cart_request_topic);
+      "dds_dock_request_topic",
+      server_node_config.dds_dock_request_topic);
   get_parameter("update_state_frequency",
       server_node_config.update_state_frequency);
   get_parameter(
@@ -224,20 +224,20 @@ void ServerNode::start(Fields _fields)
           destination_request_sub_opt);
 
   // --------------------------------------------------------------------------
-  // Cart reqeust handling
+  // Dock reqeust handling
 
-  auto cart_request_sub_opt = rclcpp::SubscriptionOptions();
+  auto dock_request_sub_opt = rclcpp::SubscriptionOptions();
 
-  cart_request_sub_opt.callback_group = fleet_state_pub_callback_group;
+  dock_request_sub_opt.callback_group = fleet_state_pub_callback_group;
 
-  cart_request_sub =
-      create_subscription<rmf_fleet_msgs::msg::CartRequest>(
-          server_node_config.cart_request_topic, rclcpp::QoS(10),
-          [&](rmf_fleet_msgs::msg::CartRequest::UniquePtr msg)
+  dock_request_sub =
+      create_subscription<rmf_fleet_msgs::msg::DockRequest>(
+          server_node_config.dock_request_topic, rclcpp::QoS(10),
+          [&](rmf_fleet_msgs::msg::DockRequest::UniquePtr msg)
           {
-            handle_cart_request(std::move(msg));
+            handle_dock_request(std::move(msg));
           },
-          cart_request_sub_opt);
+          dock_request_sub_opt);
 }
 
 bool ServerNode::is_request_valid(
@@ -364,16 +364,16 @@ void ServerNode::handle_destination_request(
   fields.server->send_destination_request(ff_msg);
 }
 
-void ServerNode::handle_cart_request(
-    rmf_fleet_msgs::msg::CartRequest::UniquePtr _msg)
+void ServerNode::handle_dock_request(
+    rmf_fleet_msgs::msg::DockRequest::UniquePtr _msg)
 {
   rmf_fleet_msgs::msg::Location fleet_frame_destination;
   transform_rmf_to_fleet(_msg->destination, fleet_frame_destination);
   _msg->destination = fleet_frame_destination;
 
-  messages::CartRequest ff_msg;
+  messages::DockRequest ff_msg;
   to_ff_message(*(_msg.get()), ff_msg);
-  fields.server->send_cart_request(ff_msg);
+  fields.server->send_dock_request(ff_msg);
 }
 
 void ServerNode::update_state_callback()

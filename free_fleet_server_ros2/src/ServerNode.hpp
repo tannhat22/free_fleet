@@ -33,7 +33,7 @@
 #include <rmf_fleet_msgs/msg/mode_request.hpp>
 #include <rmf_fleet_msgs/msg/path_request.hpp>
 #include <rmf_fleet_msgs/msg/destination_request.hpp>
-#include <rmf_fleet_msgs/msg/cart_request.hpp>
+#include <rmf_fleet_msgs/msg/dock_request.hpp>
 
 #include <free_fleet/Server.hpp>
 #include <free_fleet/messages/Location.hpp>
@@ -108,11 +108,11 @@ private:
 
   // --------------------------------------------------------------------------
 
-  rclcpp::Subscription<rmf_fleet_msgs::msg::CartRequest>::SharedPtr
-      cart_request_sub;
+  rclcpp::Subscription<rmf_fleet_msgs::msg::DockRequest>::SharedPtr
+      dock_request_sub;
 
-  void handle_cart_request(
-      rmf_fleet_msgs::msg::CartRequest::UniquePtr msg);
+  void handle_dock_request(
+      rmf_fleet_msgs::msg::DockRequest::UniquePtr msg);
 
   // --------------------------------------------------------------------------
 

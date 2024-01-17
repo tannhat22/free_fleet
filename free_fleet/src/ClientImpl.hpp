@@ -22,7 +22,7 @@
 #include <free_fleet/messages/ModeRequest.hpp>
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
-#include <free_fleet/messages/CartRequest.hpp>
+#include <free_fleet/messages/DockRequest.hpp>
 #include <free_fleet/Client.hpp>
 #include <free_fleet/ClientConfig.hpp>
 
@@ -61,9 +61,9 @@ public:
     dds::DDSSubscribeHandler<FreeFleetData_DestinationRequest>::SharedPtr
         destination_request_sub;
   
-    /// DDS subscriber for cart requests coming from the server
-    dds::DDSSubscribeHandler<FreeFleetData_CartRequest>::SharedPtr
-        cart_request_sub;
+    /// DDS subscriber for dock requests coming from the server
+    dds::DDSSubscribeHandler<FreeFleetData_DockRequest>::SharedPtr
+        dock_request_sub;
   };
 
   ClientImpl(const ClientConfig& config);
@@ -80,7 +80,7 @@ public:
 
   bool read_destination_request(messages::DestinationRequest& destination_request);
   
-  bool read_cart_request(messages::CartRequest& cart_request);
+  bool read_dock_request(messages::DockRequest& dock_request);
 
 private:
 

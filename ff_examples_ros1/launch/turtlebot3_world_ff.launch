@@ -72,7 +72,7 @@
     <param name="dds_mode_request_topic" type="string" value="mode_request"/>
     <param name="dds_path_request_topic" type="string" value="path_request"/>
     <param name="dds_destination_request_topic" type="string" value="destination_request"/>
-    <param name="dds_cart_request_topic" type="string" value="cart_request"/>
+    <param name="dds_dock_request_topic" type="string" value="dock_request"/>
     <param name="battery_state_topic" type="string" value="/battery_state"/>
     <param name="move_base_server_name" type="string" value="move_base"/>
     <param name="follow_waypoints_server_name" type="string" value="follow_waypoints_server"/>

@@ -29,23 +29,23 @@ const dds_topic_descriptor_t FreeFleetData_RobotMode_desc =
 };
 
 
-static const uint32_t FreeFleetData_CartMode_ops [] =
+static const uint32_t FreeFleetData_DockMode_ops [] =
 {
-  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_CartMode, mode),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockMode, mode),
   DDS_OP_RTS
 };
 
-const dds_topic_descriptor_t FreeFleetData_CartMode_desc =
+const dds_topic_descriptor_t FreeFleetData_DockMode_desc =
 {
-  sizeof (FreeFleetData_CartMode),
+  sizeof (FreeFleetData_DockMode),
   4u,
   0u,
   0u,
-  "FreeFleetData::CartMode",
+  "FreeFleetData::DockMode",
   NULL,
   2,
-  FreeFleetData_CartMode_ops,
-  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"CartMode\"><Member name=\"mode\"><ULong/></Member></Struct></Module></MetaData>"
+  FreeFleetData_DockMode_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"DockMode\"><Member name=\"mode\"><ULong/></Member></Struct></Module></MetaData>"
 };
 
 
@@ -221,30 +221,30 @@ const dds_topic_descriptor_t FreeFleetData_DestinationRequest_desc =
 };
 
 
-static const uint32_t FreeFleetData_CartRequest_ops [] =
+static const uint32_t FreeFleetData_DockRequest_ops [] =
 {
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CartRequest, fleet_name),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CartRequest, robot_name),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_CartRequest, destination.sec),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_CartRequest, destination.nanosec),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_CartRequest, destination.x),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_CartRequest, destination.y),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_CartRequest, destination.yaw),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CartRequest, destination.level_name),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CartRequest, task_id),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_CartRequest, cart_mode.mode),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, fleet_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, robot_name),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, destination.sec),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockRequest, destination.nanosec),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.x),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.y),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.yaw),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, destination.level_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, task_id),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockRequest, dock_mode.mode),
   DDS_OP_RTS
 };
 
-const dds_topic_descriptor_t FreeFleetData_CartRequest_desc =
+const dds_topic_descriptor_t FreeFleetData_DockRequest_desc =
 {
-  sizeof (FreeFleetData_CartRequest),
+  sizeof (FreeFleetData_DockRequest),
   sizeof (char *),
   DDS_TOPIC_NO_OPTIMIZE,
   0u,
-  "FreeFleetData::CartRequest",
+  "FreeFleetData::DockRequest",
   NULL,
   11,
-  FreeFleetData_CartRequest_ops,
-  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"CartMode\"><Member name=\"mode\"><ULong/></Member></Struct><Struct name=\"CartRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"cart_mode\"><Type name=\"CartMode\"/></Member></Struct></Module></MetaData>"
+  FreeFleetData_DockRequest_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"DockMode\"><Member name=\"mode\"><ULong/></Member></Struct><Struct name=\"DockRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"dock_mode\"><Type name=\"DockMode\"/></Member></Struct></Module></MetaData>"
 };

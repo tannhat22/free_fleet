@@ -87,14 +87,14 @@ bool Server::ServerImpl::send_destination_request(
   return sent;
 }
 
-bool Server::ServerImpl::send_cart_request(
-    const messages::CartRequest& _cart_request)
+bool Server::ServerImpl::send_dock_request(
+    const messages::DockRequest& _dock_request)
 {
-  FreeFleetData_CartRequest* new_cr = 
-      FreeFleetData_CartRequest__alloc();
-  convert(_cart_request, *new_cr);
-  bool sent = fields.cart_request_pub->write(new_cr);
-  FreeFleetData_CartRequest_free(new_cr, DDS_FREE_ALL);
+  FreeFleetData_DockRequest* new_cr = 
+      FreeFleetData_DockRequest__alloc();
+  convert(_dock_request, *new_cr);
+  bool sent = fields.dock_request_pub->write(new_cr);
+  FreeFleetData_DockRequest_free(new_cr, DDS_FREE_ALL);
   return sent;
 }
 

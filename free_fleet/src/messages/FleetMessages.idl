@@ -12,17 +12,19 @@ module FreeFleetData
     const unsigned long MODE_DOCKING = 7;
     const unsigned long MODE_REQUEST_ERROR = 8;
   };
-  module CartMode_Constants
+  module DockMode_Constants
   {
     const unsigned long MODE_IDLE = 0;
-    const unsigned long MODE_PICKUP = 1;
-    const unsigned long MODE_DROPOFF = 2;
+    const unsigned long MODE_CHARGE = 1;
+    const unsigned long MODE_PICKUP = 2;
+    const unsigned long MODE_DROPOFF = 3;
+    const unsigned long MODE_UNDOCK = 4;
   };
   struct RobotMode
   {
     unsigned long mode;
   };
-  struct CartMode
+  struct DockMode
   {
     unsigned long mode;
   };
@@ -72,12 +74,12 @@ module FreeFleetData
     Location destination;
     string task_id;
   };
-  struct CartRequest
+  struct DockRequest
   {
     string fleet_name;
     string robot_name;
     Location destination;
     string task_id;
-    CartMode cart_mode;
+    DockMode dock_mode;
   };
 };

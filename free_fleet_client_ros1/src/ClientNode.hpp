@@ -159,9 +159,9 @@ private:
   bool read_destination_request();
 
   // --------------------------------------------------------------------------
-  // Cart request handling
+  // Dock request handling
 
-  bool read_cart_request();
+  bool read_dock_request();
 
   // --------------------------------------------------------------------------
   // Task handling
@@ -178,13 +178,13 @@ private:
       const std::vector<messages::Location>& locations) const;
 
   follow_waypoints::AutoDockingGoal location_to_autodock_goal(
-      const messages::Location& locations, const messages::CartMode& _mode) const;
+      const messages::Location& locations, const messages::DockMode& _mode) const;
 
   std::mutex task_id_mutex;
 
   std::string current_task_id;
 
-  struct CartGoal 
+  struct DockGoal 
   {
     follow_waypoints::AutoDockingGoal autodock_goal;
     bool start_docking = false;
@@ -215,8 +215,8 @@ private:
   std::deque<Goal> goal_path;
   WaypointsGoal waypoints_path;
   
-  std::mutex cart_goal_mutex;
-  CartGoal cart_goal;
+  std::mutex dock_goal_mutex;
+  DockGoal dock_goal;
 
   void read_requests();
 

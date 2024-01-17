@@ -72,14 +72,14 @@ void to_ff_message(
 }
 
 void to_ff_message(
-    const rmf_fleet_msgs::msg::CartRequest& _in_msg, 
-    messages::CartRequest& _out_msg)
+    const rmf_fleet_msgs::msg::DockRequest& _in_msg, 
+    messages::DockRequest& _out_msg)
 {
   _out_msg.fleet_name = _in_msg.fleet_name;
   _out_msg.robot_name = _in_msg.robot_name;
   to_ff_message(_in_msg.destination, _out_msg.destination);
   _out_msg.task_id = _in_msg.task_id;
-  _out_msg.cart_mode.mode = _in_msg.cart_mode.mode;
+  _out_msg.dock_mode.mode = _in_msg.dock_mode.mode;
 }
 
 void to_ros_message(

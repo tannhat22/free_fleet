@@ -38,13 +38,13 @@ void convert(const FreeFleetData_RobotMode& _input, RobotMode& _output)
   _output.mode = _input.mode;
 }
 
-// Cart Mode custom
-void convert(const CartMode& _input, FreeFleetData_CartMode& _output)
+// Dock Mode custom
+void convert(const DockMode& _input, FreeFleetData_DockMode& _output)
 {
   _output.mode = _input.mode;
 }
 
-void convert(const FreeFleetData_CartMode& _input, CartMode& _output)
+void convert(const FreeFleetData_DockMode& _input, DockMode& _output)
 {
   _output.mode = _input.mode;
 }
@@ -205,25 +205,25 @@ void convert(
 }
 
 void convert(
-    const CartRequest& _input, 
-    FreeFleetData_CartRequest& _output)
+    const DockRequest& _input, 
+    FreeFleetData_DockRequest& _output)
 {
   _output.fleet_name = common::dds_string_alloc_and_copy(_input.fleet_name);
   _output.robot_name = common::dds_string_alloc_and_copy(_input.robot_name);
   convert(_input.destination, _output.destination);
   _output.task_id = common::dds_string_alloc_and_copy(_input.task_id);
-  convert(_input.cart_mode, _output.cart_mode);
+  convert(_input.dock_mode, _output.dock_mode);
 }
 
 void convert(
-    const FreeFleetData_CartRequest& _input,
-    CartRequest& _output)
+    const FreeFleetData_DockRequest& _input,
+    DockRequest& _output)
 {
   _output.fleet_name = std::string(_input.fleet_name);
   _output.robot_name = std::string(_input.robot_name);
   convert(_input.destination, _output.destination);
   _output.task_id = std::string(_input.task_id);
-  convert(_input.cart_mode, _output.cart_mode);
+  convert(_input.dock_mode, _output.dock_mode);
 }
 
 } // namespace messages

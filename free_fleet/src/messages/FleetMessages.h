@@ -26,9 +26,11 @@ extern "C" {
 #define FreeFleetData_RobotMode_Constants_MODE_GOING_HOME 6
 #define FreeFleetData_RobotMode_Constants_MODE_DOCKING 7
 #define FreeFleetData_RobotMode_Constants_MODE_REQUEST_ERROR 8
-#define FreeFleetData_CartMode_Constants_MODE_IDLE 0
-#define FreeFleetData_CartMode_Constants_MODE_PICKUP 1
-#define FreeFleetData_CartMode_Constants_MODE_DROPOFF 2
+#define FreeFleetData_DockMode_Constants_MODE_IDLE 0
+#define FreeFleetData_DockMode_Constants_MODE_CHARGE 1
+#define FreeFleetData_DockMode_Constants_MODE_PICKUP 2
+#define FreeFleetData_DockMode_Constants_MODE_DROPOFF 3
+#define FreeFleetData_DockMode_Constants_MODE_UNDOCK 4
 
 
 typedef struct FreeFleetData_RobotMode
@@ -45,18 +47,18 @@ extern const dds_topic_descriptor_t FreeFleetData_RobotMode_desc;
 dds_sample_free ((d), &FreeFleetData_RobotMode_desc, (o))
 
 
-typedef struct FreeFleetData_CartMode
+typedef struct FreeFleetData_DockMode
 {
   uint32_t mode;
-} FreeFleetData_CartMode;
+} FreeFleetData_DockMode;
 
-extern const dds_topic_descriptor_t FreeFleetData_CartMode_desc;
+extern const dds_topic_descriptor_t FreeFleetData_DockMode_desc;
 
-#define FreeFleetData_CartMode__alloc() \
-((FreeFleetData_CartMode*) dds_alloc (sizeof (FreeFleetData_CartMode)));
+#define FreeFleetData_DockMode__alloc() \
+((FreeFleetData_DockMode*) dds_alloc (sizeof (FreeFleetData_DockMode)));
 
-#define FreeFleetData_CartMode_free(d,o) \
-dds_sample_free ((d), &FreeFleetData_CartMode_desc, (o))
+#define FreeFleetData_DockMode_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_DockMode_desc, (o))
 
 
 typedef struct FreeFleetData_Location
@@ -207,22 +209,22 @@ extern const dds_topic_descriptor_t FreeFleetData_DestinationRequest_desc;
 dds_sample_free ((d), &FreeFleetData_DestinationRequest_desc, (o))
 
 
-typedef struct FreeFleetData_CartRequest
+typedef struct FreeFleetData_DockRequest
 {
   char * fleet_name;
   char * robot_name;
   FreeFleetData_Location destination;
   char * task_id;
-  FreeFleetData_CartMode cart_mode;
-} FreeFleetData_CartRequest;
+  FreeFleetData_DockMode dock_mode;
+} FreeFleetData_DockRequest;
 
-extern const dds_topic_descriptor_t FreeFleetData_CartRequest_desc;
+extern const dds_topic_descriptor_t FreeFleetData_DockRequest_desc;
 
-#define FreeFleetData_CartRequest__alloc() \
-((FreeFleetData_CartRequest*) dds_alloc (sizeof (FreeFleetData_CartRequest)));
+#define FreeFleetData_DockRequest__alloc() \
+((FreeFleetData_DockRequest*) dds_alloc (sizeof (FreeFleetData_DockRequest)));
 
-#define FreeFleetData_CartRequest_free(d,o) \
-dds_sample_free ((d), &FreeFleetData_CartRequest_desc, (o))
+#define FreeFleetData_DockRequest_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_DockRequest_desc, (o))
 
 #ifdef __cplusplus
 }
