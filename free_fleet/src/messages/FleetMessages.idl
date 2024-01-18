@@ -81,5 +81,8 @@ module FreeFleetData
     Location destination;
     string task_id;
     DockMode dock_mode;
+    boolean custom_docking;
+    short rotate_angle;
+    short rotate_orientation;
   };
 };

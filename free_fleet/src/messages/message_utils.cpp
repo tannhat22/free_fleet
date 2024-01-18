@@ -213,6 +213,9 @@ void convert(
   convert(_input.destination, _output.destination);
   _output.task_id = common::dds_string_alloc_and_copy(_input.task_id);
   convert(_input.dock_mode, _output.dock_mode);
+  _output.custom_docking = _input.custom_docking;
+  _output.rotate_angle = _input.rotate_angle;
+  _output.rotate_orientation = _input.rotate_orientation;
 }
 
 void convert(
@@ -224,6 +227,9 @@ void convert(
   convert(_input.destination, _output.destination);
   _output.task_id = std::string(_input.task_id);
   convert(_input.dock_mode, _output.dock_mode);
+  _output.custom_docking = _input.custom_docking;
+  _output.rotate_angle = _input.rotate_angle;
+  _output.rotate_orientation = _input.rotate_orientation;
 }
 
 } // namespace messages

@@ -32,8 +32,8 @@
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
 
-#include <follow_waypoints/AutoDockingGoal.h>
-#include <follow_waypoints/AutoDockingAction.h>
+#include <amr_v3_autodocking/AutoDockingGoal.h>
+#include <amr_v3_autodocking/AutoDockingAction.h>
 #include <follow_waypoints/FollowWaypointsGoal.h>
 #include <follow_waypoints/FollowWaypointsAction.h>
 #include <move_base_msgs/MoveBaseGoal.h>
@@ -59,7 +59,7 @@ public:
   using WriteLock = std::unique_lock<std::mutex>;
 
   using AutoDockClient = 
-      actionlib::SimpleActionClient<follow_waypoints::AutoDockingAction>;
+      actionlib::SimpleActionClient<amr_v3_autodocking::AutoDockingAction>;
   using AutoDockClientSharedPtr = std::shared_ptr<AutoDockClient>;
 
   using FollowWaypointsClient = 
@@ -177,8 +177,9 @@ private:
   follow_waypoints::FollowWaypointsGoal location_to_follow_waypoints_goal(
       const std::vector<messages::Location>& locations) const;
 
-  follow_waypoints::AutoDockingGoal location_to_autodock_goal(
-      const messages::Location& locations, const messages::DockMode& _mode) const;
+  amr_v3_autodocking::AutoDockingGoal location_to_autodock_goal(
+      const messages::Location& locations, const messages::DockMode& _mode,
+      const bool custom_docking, const int16_t rotate_angle, const int16_t rotate_direction) const;
 
   std::mutex task_id_mutex;
 
@@ -186,7 +187,7 @@ private:
 
   struct DockGoal 
   {
-    follow_waypoints::AutoDockingGoal autodock_goal;
+    amr_v3_autodocking::AutoDockingGoal autodock_goal;
     bool start_docking = false;
     bool sent = false;
     uint32_t aborted_count = 0;

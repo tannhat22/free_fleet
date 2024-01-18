@@ -74,7 +74,7 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
   {
     ROS_ERROR("timed out waiting for action server: %s",
         _config.autodock_server_name.c_str());
-    // return nullptr;
+    return nullptr;
   }
   ROS_INFO("connected with autodock action server: %s",
       _config.autodock_server_name.c_str());
@@ -329,10 +329,11 @@ follow_waypoints::FollowWaypointsGoal ClientNode::location_to_follow_waypoints_g
   return goal;
 }
 
-follow_waypoints::AutoDockingGoal ClientNode::location_to_autodock_goal(
-      const messages::Location& _location, const messages::DockMode& _mode) const
+amr_v3_autodocking::AutoDockingGoal ClientNode::location_to_autodock_goal(
+      const messages::Location& _location, const messages::DockMode& _mode,
+      const bool _custom_docking, const int16_t _rotate_angle, const int16_t _rotate_direction ) const
 {
-  follow_waypoints::AutoDockingGoal goal;
+  amr_v3_autodocking::AutoDockingGoal goal;
   goal.dock_pose.header.frame_id = client_node_config.map_frame;
   goal.dock_pose.header.stamp.sec = _location.sec;
   goal.dock_pose.header.stamp.nsec = _location.nanosec;
@@ -341,6 +342,9 @@ follow_waypoints::AutoDockingGoal ClientNode::location_to_autodock_goal(
   goal.dock_pose.pose.position.z = 0.0;
   goal.dock_pose.pose.orientation = get_quat_from_yaw(_location.yaw);
   goal.mode = _mode.mode;
+  goal.custom_docking = _custom_docking;
+  goal.rotate_angle = _rotate_angle;
+  goal.rotate_direction = _rotate_direction;
   return goal;
 }
 

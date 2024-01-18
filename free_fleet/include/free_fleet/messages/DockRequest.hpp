@@ -31,6 +31,9 @@ struct DockRequest
   Location destination;
   std::string task_id;
   DockMode dock_mode;
+  bool custom_docking;
+  int16_t rotate_angle;
+  int16_t rotate_orientation;
 };
 
 } // namespace messages

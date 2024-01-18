@@ -27,6 +27,7 @@ find_package(catkin QUIET COMPONENTS
   actionlib
   move_base_msgs
   follow_waypoints
+  amr_v3_autodocking
 )
 
 if (catkin_FOUND)
