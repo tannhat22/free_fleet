@@ -532,13 +532,24 @@ bool ClientNode::read_dock_request()
           dock_request.fleet_name, dock_request.robot_name,
           dock_request.task_id))
   {
-    if (dock_request.dock_mode.mode == messages::DockMode::MODE_PICKUP)
+    if (dock_request.dock_mode.mode == messages::DockMode::MODE_CHARGE)
+    {
+      ROS_INFO("received Dock command, mode: CHARGE");
+    }
+    else if (dock_request.dock_mode.mode == messages::DockMode::MODE_PICKUP)
     {
       ROS_INFO("received Dock command, mode: PICKUP");
     }
     else if (dock_request.dock_mode.mode == messages::DockMode::MODE_DROPOFF)
     {
       ROS_INFO("received Dock command, mode: DROPOFF");
+    }
+    else if (dock_request.dock_mode.mode == messages::DockMode::MODE_UNDOCK)
+    {
+      ROS_INFO("received Dock command, mode: UNDOCK");
+    }
+    else {
+      ROS_ERROR("received Dock command but mode does not support. Please check again!");
     }
 
     WriteLock dock_goal_lock(dock_goal_mutex);
