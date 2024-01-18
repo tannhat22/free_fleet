@@ -658,6 +658,7 @@ void ClientNode::handle_requests()
           fields.follow_waypoints_client->cancelGoal();
           goal_path.clear();
           reset_waypoints_path();
+          request_error = true;
           return;
         }
       }
@@ -670,6 +671,7 @@ void ClientNode::handle_requests()
         fields.follow_waypoints_client->cancelGoal();
         goal_path.clear();
         reset_waypoints_path();
+        request_error = true;
         return;
       }
     } else {
@@ -806,6 +808,7 @@ void ClientNode::handle_requests()
         fields.autodock_client->cancelGoal();
         dock_goal.start_docking = false;
         docking = false;
+        request_error = true;
         return;
       }
     }
@@ -818,6 +821,7 @@ void ClientNode::handle_requests()
       fields.autodock_client->cancelGoal();
       dock_goal.start_docking = false;
       docking = false;
+      request_error = true;
       return;
     }
   }
