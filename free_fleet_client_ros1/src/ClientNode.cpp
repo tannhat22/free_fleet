@@ -343,8 +343,8 @@ amr_v3_autodocking::AutoDockingGoal ClientNode::location_to_autodock_goal(
   goal.dock_pose.pose.orientation = get_quat_from_yaw(_location.yaw);
   goal.mode = _mode.mode;
   goal.custom_docking = _custom_docking;
-  goal.rotate_angle = _rotate_angle;
-  goal.rotate_direction = _rotate_direction;
+  goal.ROTATE_ANGLE = _rotate_angle;
+  goal.ROTATE_ORIENTATION = _rotate_direction;
   return goal;
 }
 
@@ -558,7 +558,10 @@ bool ClientNode::read_dock_request()
 
     WriteLock dock_goal_lock(dock_goal_mutex);
     dock_goal.autodock_goal = location_to_autodock_goal(dock_request.destination,
-                                                        dock_request.dock_mode);
+                                                        dock_request.dock_mode,
+                                                        dock_request.custom_docking,
+                                                        dock_request.rotate_angle,
+                                                        dock_request.rotate_orientation);
     dock_goal.aborted_count = 0;
     dock_goal.sent = false;
     dock_goal.start_docking = true;
