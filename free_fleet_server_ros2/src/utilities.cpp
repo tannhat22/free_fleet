@@ -30,6 +30,8 @@ void to_ff_message(
   _out_msg.x = _in_msg.x;
   _out_msg.y = _in_msg.y;
   _out_msg.yaw = _in_msg.yaw;
+  _out_msg.obey_approach_speed_limit = _in_msg.obey_approach_speed_limit;
+  _out_msg.approach_speed_limit = _in_msg.approach_speed_limit;
   _out_msg.level_name = _in_msg.level_name;
 }
 
@@ -94,6 +96,8 @@ void to_ros_message(
   _out_msg.x = _in_msg.x;
   _out_msg.y = _in_msg.y;
   _out_msg.yaw = _in_msg.yaw;
+  _out_msg.obey_approach_speed_limit = _in_msg.obey_approach_speed_limit;
+  _out_msg.approach_speed_limit = _in_msg.approach_speed_limit;
   _out_msg.level_name = _in_msg.level_name;
 }
 

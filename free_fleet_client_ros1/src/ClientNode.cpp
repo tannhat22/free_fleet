@@ -136,6 +136,19 @@ void ClientNode::start(Fields _fields)
   update_rate.reset(new ros::Rate(client_node_config.update_frequency));
   publish_rate.reset(new ros::Rate(client_node_config.publish_frequency));
 
+  // Runonce pub
+  cmd_runonce_pub = node->advertise<std_msgs::Bool>(
+    client_node_config.cmd_runonce_topic, 10
+  );
+  // Brake pub
+  cmd_brake_pub = node->advertise<std_msgs::Bool>(
+    client_node_config.cmd_breaker_topic, 10
+  );
+  // Pause sub
+  cmd_pause_amr_sub = node->subscribe(
+      client_node_config.cmd_pause_topic, 1,
+      &ClientNode::cmd_pause_amr_callback, this);
+
   battery_percent_sub = node->subscribe(
       client_node_config.battery_state_topic, 1,
       &ClientNode::battery_state_callback_fn, this);
@@ -143,6 +156,8 @@ void ClientNode::start(Fields _fields)
   request_error = false;
   emergency = false;
   paused = false;
+  docking = false;
+  state_runonce = false;
 
   ROS_INFO("Client: starting update thread.");
   update_thread = std::thread(std::bind(&ClientNode::update_thread_fn, this));
@@ -155,6 +170,24 @@ void ClientNode::start(Fields _fields)
 void ClientNode::print_config()
 {
   client_node_config.print_config();
+}
+
+void ClientNode::cmd_pause_amr_callback(
+    const std_msgs::Bool& _msg)
+{
+  if (paused != _msg.data) {
+    if (_msg.data) {
+      fields.move_base_client->cancelAllGoals();
+      // fields.follow_waypoints_client->cancelAllGoals();
+      WriteLock goal_path_lock(goal_path_mutex);
+      if (!goal_path.empty()) {
+        goal_path[0].sent = false;
+        waypoints_path.sent = false;
+      }
+    }
+    paused = _msg.data;
+    emergency = false;
+  }
 }
 
 void ClientNode::battery_state_callback_fn(
@@ -222,6 +255,11 @@ messages::RobotMode ClientNode::get_robot_mode()
 
   /// Otherwise, robot has queued tasks, it is paused or waiting,
   /// default to use pausing for now
+  if (state_runonce) {
+    cmd_runonce(false);
+    cmd_brake(true);
+    state_runonce = false;
+  }
   return messages::RobotMode{messages::RobotMode::MODE_IDLE};
 }
 
@@ -383,23 +421,23 @@ bool ClientNode::read_mode_request()
       paused = false;
       emergency = true;
     }
-    else if (mode_request.mode.mode == messages::RobotMode::MODE_DOCKING)
-    {
-      ROS_INFO("received a DOCKING command.");
-      if (fields.docking_trigger_client &&
-        fields.docking_trigger_client->isValid())
-      {
-        std_srvs::Trigger trigger_srv;
-        fields.docking_trigger_client->call(trigger_srv);
-        if (!trigger_srv.response.success)
-        {
-          ROS_ERROR("Failed to trigger docking sequence, message: %s.",
-            trigger_srv.response.message.c_str());
-          request_error = true;
-          return false;
-        }
-      }
-    }
+    // else if (mode_request.mode.mode == messages::RobotMode::MODE_DOCKING)
+    // {
+    //   ROS_INFO("received a DOCKING command.");
+    //   if (fields.docking_trigger_client &&
+    //     fields.docking_trigger_client->isValid())
+    //   {
+    //     std_srvs::Trigger trigger_srv;
+    //     fields.docking_trigger_client->call(trigger_srv);
+    //     if (!trigger_srv.response.success)
+    //     {
+    //       ROS_ERROR("Failed to trigger docking sequence, message: %s.",
+    //         trigger_srv.response.message.c_str());
+    //       request_error = true;
+    //       return false;
+    //     }
+    //   }
+    // }
 
     WriteLock task_id_lock(task_id_mutex);
     current_task_id = mode_request.task_id;
@@ -600,6 +638,11 @@ void ClientNode::handle_requests()
     if (waypoints_path.follow_waypoints_path.target_poses.poses.size() >= 1) {
       if (!waypoints_path.sent)
       {
+        if (!state_runonce) {
+          cmd_runonce(true);
+          cmd_brake(false);
+          state_runonce = true;
+        }
         ROS_INFO("sending waypoints goal.");
         fields.follow_waypoints_client->sendGoal(waypoints_path.follow_waypoints_path,
                                                  boost::bind(&ClientNode::doneCb, this, _1, _2),
@@ -621,20 +664,20 @@ void ClientNode::handle_requests()
         // By some stroke of good fortune, we may have arrived at our goal
         // earlier than we were scheduled to reach it. If that is the case,
         // we need to wait here until it's time to proceed.
-        if (ros::Time::now() >= goal_path.front().goal_end_time)
-        {
-          goal_path.clear();
-          reset_waypoints_path();
-        }
-        else
-        {
-          ros::Duration wait_time_remaining =
-              waypoints_path.goal_end_time - ros::Time::now();
-          ROS_INFO(
-              "we reached our goal early! Waiting %.1f more seconds",
-              wait_time_remaining.toSec());
-        }
-        return;
+        // if (ros::Time::now() >= goal_path.front().goal_end_time)
+        // {
+        //   goal_path.clear();
+        //   reset_waypoints_path();
+        // }
+        // else
+        // {
+        //   ros::Duration wait_time_remaining =
+        //       waypoints_path.goal_end_time - ros::Time::now();
+        //   ROS_INFO(
+        //       "we reached our goal early! Waiting %.1f more seconds",
+        //       wait_time_remaining.toSec());
+        // }
+        // return;
       }
       else if (current_goal_state == GoalState::ACTIVE)
       {
@@ -764,13 +807,16 @@ void ClientNode::handle_requests()
     if (!docking)
       docking = true;
 
-    // ROS_WARN("Sending autodock goal.");
-    // dock_goal.start_docking = false;
+    // ROS_WARN("Sending autodock goal.");waypoints_path
     // docking = false;
     // return;
 
     if (!dock_goal.sent)
     {
+      if (!state_runonce) {
+        cmd_runonce(true);
+        state_runonce = true;
+      }      
       ROS_INFO("sending autodock goal.");
       fields.autodock_client->sendGoal(dock_goal.autodock_goal);
       // goal_path.front().sent = true;
@@ -858,6 +904,22 @@ void ClientNode::feedbackCb(const follow_waypoints::FollowWaypointsFeedbackConst
       "update remaining target poses: %ld target poses", goal_path.size());
     }
   }
+  return;
+}
+
+void ClientNode::cmd_runonce(bool run)
+{
+  std_msgs::Bool msg;
+  msg.data = run;
+  cmd_runonce_pub.publish(msg);
+  return;
+}
+
+void ClientNode::cmd_brake(bool brake)
+{
+  std_msgs::Bool msg;
+  msg.data = brake;
+  cmd_brake_pub.publish(msg);
   return;
 }
 

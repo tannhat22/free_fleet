@@ -37,6 +37,10 @@ struct ClientNodeConfig
   std::string robot_model = "robot_model";
   std::string level_name = "level_name";
 
+  std::string cmd_runonce_topic = "state_runonce_nav";
+  std::string cmd_pause_topic = "PAUSE_AMR";
+  std::string cmd_breaker_topic = "cmd_brake";
+
   std::string battery_state_topic = "/battery_state";
 
   std::string map_frame = "map";

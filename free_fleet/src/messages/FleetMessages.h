@@ -68,6 +68,8 @@ typedef struct FreeFleetData_Location
   float x;
   float y;
   float yaw;
+  bool obey_approach_speed_limit;
+  float approach_speed_limit;
   char * level_name;
 } FreeFleetData_Location;
 

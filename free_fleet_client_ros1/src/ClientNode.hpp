@@ -28,6 +28,7 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <std_srvs/Trigger.h>
+#include <std_msgs/Bool.h>
 #include <sensor_msgs/BatteryState.h>
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -107,6 +108,16 @@ private:
   std::unique_ptr<ros::Rate> publish_rate;
 
   // --------------------------------------------------------------------------
+  // Robot logic handling
+    // Publisher:
+  ros::Publisher cmd_runonce_pub;
+  ros::Publisher cmd_brake_pub;
+
+    // Subcriber:
+  ros::Subscriber cmd_pause_amr_sub;
+
+  void cmd_pause_amr_callback(const std_msgs::Bool& msg);
+  // --------------------------------------------------------------------------
   // Battery handling
 
   ros::Subscriber battery_percent_sub;
@@ -142,6 +153,7 @@ private:
   std::atomic<bool> emergency;
   std::atomic<bool> paused;
   std::atomic<bool> docking;
+  std::atomic<bool> state_runonce;
 
 
   messages::RobotMode get_robot_mode();
@@ -235,6 +247,10 @@ private:
   void feedbackCb(const follow_waypoints::FollowWaypointsFeedbackConstPtr& feedback);
 
   void reset_waypoints_path();
+
+  void cmd_runonce(bool run);
+
+  void cmd_brake(bool brake);
 
   // --------------------------------------------------------------------------
   // Threads and thread functions

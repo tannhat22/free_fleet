@@ -37,14 +37,14 @@ def main(argv = sys.argv):
     - dock_mode.mode: PICKUP
     '''
 
-    default_fleet_name = 'fleet_name'
-    default_robot_name = 'robot_name'
+    default_fleet_name = 'amr_vdm'
+    default_robot_name = 'amr_002'
     default_task_id = '576y13ewgyffeijuais'
     default_desired_x = 0.0
     default_desired_y = 0.0
     default_desired_yaw = 0.0
-    default_level_name = 'B1'
-    default_mode = 'mode'
+    default_level_name = 'L1'
+    default_mode = 'pickup'
     default_topic_name = 'robot_dock_requests'
 
     parser = argparse.ArgumentParser()
@@ -98,6 +98,10 @@ def main(argv = sys.argv):
         print('unrecognized mode requested, only use charge, pickup, dropoff or undock please')
         return
   
+    msg.custom_docking = False
+    # msg.rotate_angle = 90
+    # msg.rotate_orientation = 1
+
     rclpy.spin_once(node, timeout_sec=1.0)
     pub.publish(msg)
     rclpy.spin_once(node, timeout_sec=0.5)
