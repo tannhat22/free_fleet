@@ -72,7 +72,7 @@ Start a new ROS 1 workspace, and pull in the necessary repositories,
 ```bash
 mkdir -p ~/ff_ros1_ws/src
 cd ~/ff_ros1_ws/src
-git clone https://github.com/open-rmf/free_fleet -b main
+git clone https://github.com/tannhat22/free_fleet.git -b main
 git clone https://github.com/eclipse-cyclonedds/cyclonedds -b releases/0.7.x
 ```
 
