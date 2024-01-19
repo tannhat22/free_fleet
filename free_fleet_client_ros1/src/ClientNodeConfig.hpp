@@ -40,6 +40,7 @@ struct ClientNodeConfig
   std::string cmd_runonce_topic = "state_runonce_nav";
   std::string cmd_pause_topic = "PAUSE_AMR";
   std::string cmd_breaker_topic = "cmd_brake";
+  std::string emergency_stop_topic = "emergency_stop";
 
   std::string battery_state_topic = "/battery_state";
 

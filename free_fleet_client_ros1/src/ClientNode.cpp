@@ -136,28 +136,34 @@ void ClientNode::start(Fields _fields)
   update_rate.reset(new ros::Rate(client_node_config.update_frequency));
   publish_rate.reset(new ros::Rate(client_node_config.publish_frequency));
 
+  request_error = false;
+  emergency = false;
+  paused = false;
+  docking = false;
+  state_runonce = false;  
+
   // Runonce pub
   cmd_runonce_pub = node->advertise<std_msgs::Bool>(
-    client_node_config.cmd_runonce_topic, 10
-  );
+    client_node_config.cmd_runonce_topic, 10);
+
   // Brake pub
   cmd_brake_pub = node->advertise<std_msgs::Bool>(
-    client_node_config.cmd_breaker_topic, 10
-  );
+    client_node_config.cmd_breaker_topic, 10);
+
   // Pause sub
   cmd_pause_amr_sub = node->subscribe(
       client_node_config.cmd_pause_topic, 1,
       &ClientNode::cmd_pause_amr_callback, this);
 
+  // Emergency stop sub
+  emergency_stop_sub = node->subscribe(
+      client_node_config.emergency_stop_topic, 1,
+      &ClientNode::emergency_stop_callback, this);
+
+  // Battery state sub 
   battery_percent_sub = node->subscribe(
       client_node_config.battery_state_topic, 1,
       &ClientNode::battery_state_callback_fn, this);
-
-  request_error = false;
-  emergency = false;
-  paused = false;
-  docking = false;
-  state_runonce = false;
 
   ROS_INFO("Client: starting update thread.");
   update_thread = std::thread(std::bind(&ClientNode::update_thread_fn, this));
@@ -170,6 +176,16 @@ void ClientNode::start(Fields _fields)
 void ClientNode::print_config()
 {
   client_node_config.print_config();
+}
+
+void ClientNode::emergency_stop_callback(
+  const std_msgs::Bool& _msg)
+{
+  emergency = _msg.data;
+  if (emergency) {
+    WriteLock dock_goal_lock(dock_goal_mutex);
+    reset_autodock_goal();
+  }
 }
 
 void ClientNode::cmd_pause_amr_callback(
@@ -407,13 +423,13 @@ bool ClientNode::read_mode_request()
       }
 
       paused = true;
-      emergency = false;
+      // emergency = false;
     }
     else if (mode_request.mode.mode == messages::RobotMode::MODE_MOVING)
     {
       ROS_INFO("received an explicit RESUME command.");
       paused = false;
-      emergency = false;
+      // emergency = false;
     }
     else if (mode_request.mode.mode == messages::RobotMode::MODE_EMERGENCY)
     {
@@ -488,7 +504,7 @@ bool ClientNode::read_path_request()
         reset_waypoints_path();
 
         request_error = true;
-        emergency = false;
+        // emergency = false;
         paused = false;
         return false;
       }
@@ -930,6 +946,15 @@ void ClientNode::reset_waypoints_path()
   waypoints_path.aborted_count = 0;
   return;
 }
+
+void ClientNode::reset_autodock_goal()
+{
+  dock_goal.start_docking = false;
+  dock_goal.sent = false;
+  dock_goal.aborted_count = 0;
+  return;
+}
+
 
 void ClientNode::update_thread_fn()
 {

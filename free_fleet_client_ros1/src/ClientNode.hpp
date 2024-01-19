@@ -114,8 +114,10 @@ private:
   ros::Publisher cmd_brake_pub;
 
     // Subcriber:
+  ros::Subscriber emergency_stop_sub;
   ros::Subscriber cmd_pause_amr_sub;
 
+  void emergency_stop_callback(const std_msgs::Bool& msg);
   void cmd_pause_amr_callback(const std_msgs::Bool& msg);
   // --------------------------------------------------------------------------
   // Battery handling
@@ -247,6 +249,8 @@ private:
   void feedbackCb(const follow_waypoints::FollowWaypointsFeedbackConstPtr& feedback);
 
   void reset_waypoints_path();
+
+  void reset_autodock_goal();
 
   void cmd_runonce(bool run);
 

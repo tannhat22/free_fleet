@@ -79,6 +79,7 @@ void ClientNodeConfig::print_config() const
   printf("    cmd_runonce: %s\n", cmd_runonce_topic.c_str());
   printf("    cmd_pause: %s\n", cmd_pause_topic.c_str());
   printf("    cmd_breaker: %s\n", cmd_breaker_topic.c_str());
+  printf("    emergency stop: %s\n", emergency_stop_topic.c_str());
   printf("    battery state: %s\n", battery_state_topic.c_str());
   printf("    move base server: %s\n", move_base_server_name.c_str());
   printf("    follow waypoints server: %s\n", follow_waypoints_server_name.c_str());
@@ -130,8 +131,11 @@ ClientNodeConfig ClientNodeConfig::make()
   config.get_param_if_available(
       node_private_ns, "cmd_breaker_topic", config.cmd_breaker_topic);
   config.get_param_if_available(
+      node_private_ns, "emergency_stop_topic", config.emergency_stop_topic);
+  config.get_param_if_available(
       node_private_ns, "battery_state_topic", config.battery_state_topic);
-  config.get_param_if_available(node_private_ns, "map_frame", config.map_frame);
+  config.get_param_if_available(
+      node_private_ns, "map_frame", config.map_frame);
   config.get_param_if_available(
       node_private_ns, "robot_frame", config.robot_frame);
   config.get_param_if_available(
