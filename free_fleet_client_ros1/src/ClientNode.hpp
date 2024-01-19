@@ -156,6 +156,7 @@ private:
   std::atomic<bool> paused;
   std::atomic<bool> docking;
   std::atomic<bool> state_runonce;
+  // std::atomic<bool> state_brake;
 
 
   messages::RobotMode get_robot_mode();
@@ -193,7 +194,8 @@ private:
 
   amr_v3_autodocking::AutoDockingGoal location_to_autodock_goal(
       const messages::Location& locations, const messages::DockMode& _mode,
-      const bool custom_docking, const int16_t rotate_angle, const int16_t rotate_direction) const;
+      const bool custom_docking, const int16_t _rotate_to_dock,
+      const int16_t rotate_angle, const int16_t rotate_direction) const;
 
   std::mutex task_id_mutex;
 
@@ -219,6 +221,8 @@ private:
   {
     std::string level_name;
     move_base_msgs::MoveBaseGoal goal;
+    bool obey_approach_speed_limit = false;
+    float approach_speed_limit;
     bool sent = false;
     uint32_t aborted_count = 0;
     ros::Time goal_end_time;

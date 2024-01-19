@@ -183,8 +183,16 @@ void ClientNode::emergency_stop_callback(
 {
   emergency = _msg.data;
   if (emergency) {
+    WriteLock goal_path_lock(goal_path_mutex);
+    goal_path.clear();
+
     WriteLock dock_goal_lock(dock_goal_mutex);
     reset_autodock_goal();
+
+    if (state_runonce) {
+      cmd_runonce(false);
+      state_runonce = false;
+    }  
   }
 }
 
@@ -202,7 +210,7 @@ void ClientNode::cmd_pause_amr_callback(
       }
     }
     paused = _msg.data;
-    emergency = false;
+    // emergency = false;
   }
 }
 
@@ -271,11 +279,6 @@ messages::RobotMode ClientNode::get_robot_mode()
 
   /// Otherwise, robot has queued tasks, it is paused or waiting,
   /// default to use pausing for now
-  if (state_runonce) {
-    cmd_runonce(false);
-    cmd_brake(true);
-    state_runonce = false;
-  }
   return messages::RobotMode{messages::RobotMode::MODE_IDLE};
 }
 
@@ -311,6 +314,8 @@ void ClientNode::publish_robot_state()
         current_robot_transform.transform.translation.y;
     new_robot_state.location.yaw = 
         get_yaw_from_transform(current_robot_transform);
+    new_robot_state.location.obey_approach_speed_limit = false;
+    new_robot_state.location.approach_speed_limit = 0.0;
     new_robot_state.location.level_name = client_node_config.level_name;
   }
 
@@ -328,6 +333,8 @@ void ClientNode::publish_robot_state()
               (float)goal_path[i].goal.target_pose.pose.position.y,
               (float)(get_yaw_from_quat(
                   goal_path[i].goal.target_pose.pose.orientation)),
+              (bool)goal_path[i].obey_approach_speed_limit,
+              (float)goal_path[i].approach_speed_limit,
               goal_path[i].level_name
           });
     }
@@ -379,13 +386,16 @@ follow_waypoints::FollowWaypointsGoal ClientNode::location_to_follow_waypoints_g
     pose.position.z = 0.0; 
     pose.orientation = get_quat_from_yaw(location.yaw);
     goal.target_poses.poses.push_back(pose);
+    goal.obey_approach_speed_limit.push_back(location.obey_approach_speed_limit);
+    goal.approach_speed_limit.push_back(location.approach_speed_limit);
   }
   return goal;
 }
 
 amr_v3_autodocking::AutoDockingGoal ClientNode::location_to_autodock_goal(
       const messages::Location& _location, const messages::DockMode& _mode,
-      const bool _custom_docking, const int16_t _rotate_angle, const int16_t _rotate_direction ) const
+      const bool _custom_docking, const int16_t _rotate_to_dock,
+      const int16_t _rotate_angle, const int16_t _rotate_direction ) const
 {
   amr_v3_autodocking::AutoDockingGoal goal;
   goal.dock_pose.header.frame_id = client_node_config.map_frame;
@@ -397,6 +407,7 @@ amr_v3_autodocking::AutoDockingGoal ClientNode::location_to_autodock_goal(
   goal.dock_pose.pose.orientation = get_quat_from_yaw(_location.yaw);
   goal.mode = _mode.mode;
   goal.custom_docking = _custom_docking;
+  goal.rotate_to_dock = _rotate_to_dock;
   goal.ROTATE_ANGLE = _rotate_angle;
   goal.ROTATE_ORIENTATION = _rotate_direction;
   return goal;
@@ -523,6 +534,8 @@ bool ClientNode::read_path_request()
           Goal {
               path_request.path[i].level_name,
               location_to_move_base_goal(path_request.path[i]),
+              path_request.path[i].obey_approach_speed_limit,
+              path_request.path[i].approach_speed_limit,
               false,
               0,
               ros::Time(
@@ -564,6 +577,8 @@ bool ClientNode::read_destination_request()
         Goal {
             destination_request.destination.level_name,
             location_to_move_base_goal(destination_request.destination),
+            destination_request.destination.obey_approach_speed_limit,
+            destination_request.destination.approach_speed_limit,
             false,
             0,
             ros::Time(
@@ -614,6 +629,7 @@ bool ClientNode::read_dock_request()
     dock_goal.autodock_goal = location_to_autodock_goal(dock_request.destination,
                                                         dock_request.dock_mode,
                                                         dock_request.custom_docking,
+                                                        dock_request.rotate_to_dock,
                                                         dock_request.rotate_angle,
                                                         dock_request.rotate_orientation);
     dock_goal.aborted_count = 0;
@@ -676,6 +692,10 @@ void ClientNode::handle_requests()
         ROS_INFO("Waypoints goal state: SUCCEEEDED.");
         goal_path.clear();
         reset_waypoints_path();
+        if (state_runonce) {
+          cmd_runonce(false);
+          state_runonce = false;
+        }      
         return;
         // By some stroke of good fortune, we may have arrived at our goal
         // earlier than we were scheduled to reach it. If that is the case,
@@ -725,6 +745,11 @@ void ClientNode::handle_requests()
           goal_path.clear();
           reset_waypoints_path();
           request_error = true;
+          if (state_runonce) {
+            cmd_runonce(false);
+            cmd_brake(true);
+            state_runonce = false;
+          }  
           return;
         }
       }
@@ -738,6 +763,11 @@ void ClientNode::handle_requests()
         goal_path.clear();
         reset_waypoints_path();
         request_error = true;
+        if (state_runonce) {
+          cmd_runonce(false);
+          cmd_brake(true);
+          state_runonce = false;
+        }  
         return;
       }
     } else {
@@ -847,6 +877,10 @@ void ClientNode::handle_requests()
       ROS_INFO("Autodock goal state: SUCCEEEDED.");
       dock_goal.start_docking = false;
       docking = false;
+      if (state_runonce) {
+          cmd_runonce(false);
+          state_runonce = false;
+      }  
       return;
     }
     else if (current_goal_state == GoalState::ACTIVE)
@@ -878,6 +912,11 @@ void ClientNode::handle_requests()
         dock_goal.start_docking = false;
         docking = false;
         request_error = true;
+        if (state_runonce) {
+          cmd_runonce(false);
+          cmd_brake(true);
+          state_runonce = false;
+        }  
         return;
       }
     }
@@ -891,6 +930,11 @@ void ClientNode::handle_requests()
       dock_goal.start_docking = false;
       docking = false;
       request_error = true;
+      if (state_runonce) {
+          cmd_runonce(false);
+          cmd_brake(true);
+          state_runonce = false;
+      }  
       return;
     }
   }
@@ -915,6 +959,8 @@ void ClientNode::feedbackCb(const follow_waypoints::FollowWaypointsFeedbackConst
     if (n <= goal_path.size() && n >= 1) {
       goal_path.erase(goal_path.begin(), goal_path.begin() + n);
       waypoints_path.follow_waypoints_path.target_poses = feedback->remain_target_poses;
+      waypoints_path.follow_waypoints_path.obey_approach_speed_limit = feedback->remain_obey_approach_speed_limit;
+      waypoints_path.follow_waypoints_path.approach_speed_limit = feedback->remain_approach_speed_limit;
 
       ROS_INFO("Feedback: robot is reached tolerance for current goal and will go to the next goal," 
       "update remaining target poses: %ld target poses", goal_path.size());

@@ -83,6 +83,7 @@ void to_ff_message(
   _out_msg.task_id = _in_msg.task_id;
   _out_msg.dock_mode.mode = _in_msg.dock_mode.mode;
   _out_msg.custom_docking = _in_msg.custom_docking;
+  _out_msg.rotate_to_dock = _in_msg.rotate_to_dock;
   _out_msg.rotate_angle = _in_msg.rotate_angle;
   _out_msg.rotate_orientation = _in_msg.rotate_orientation;
 }

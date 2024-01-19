@@ -219,6 +219,7 @@ typedef struct FreeFleetData_DockRequest
   char * task_id;
   FreeFleetData_DockMode dock_mode;
   bool custom_docking;
+  int16_t rotate_to_dock;
   int16_t rotate_angle;
   int16_t rotate_orientation;
 } FreeFleetData_DockRequest;
