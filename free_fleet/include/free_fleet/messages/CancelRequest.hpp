@@ -15,30 +15,23 @@
  *
  */
 
-#ifndef FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__ROBOTMODE_HPP
-#define FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__ROBOTMODE_HPP
+#ifndef FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__CANCELREQUEST_HPP
+#define FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__CANCELREQUEST_HPP
 
+#include <string>
 #include <cstdint>
 
 namespace free_fleet {
 namespace messages {
 
-struct RobotMode
+struct CancelRequest
 {
-  uint32_t mode;
-  static const uint32_t MODE_IDLE = 0;
-  static const uint32_t MODE_CHARGING = 1;
-  static const uint32_t MODE_MOVING = 2;
-  static const uint32_t MODE_PAUSED = 3;
-  static const uint32_t MODE_WAITING = 4;
-  static const uint32_t MODE_EMERGENCY = 5;
-  static const uint32_t MODE_GOING_HOME = 6;
-  static const uint32_t MODE_DOCKING = 7;
-  static const uint32_t MODE_ADAPTER_ERROR = 8;
-  static const uint32_t MODE_REQUEST_ERROR = 10;
+  std::string fleet_name;
+  std::string robot_name;
+  std::string task_id;
 };
 
 } // namespace messages
 } // namespace free_fleet
 
-#endif // FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__ROBOTMODE_HPP
+#endif // FREE_FLEET__INCLUDE__FREE_FLEET__MESSAGES__CANCELREQUEST_HPP

@@ -27,6 +27,7 @@
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
+#include <free_fleet/messages/CancelRequest.hpp>
 
 namespace free_fleet {
 
@@ -95,6 +96,17 @@ public:
   ///   True if a new dock request was received, false otherwise.
   bool read_dock_request(
       messages::DockRequest& dock_request);
+
+  /// Attempts to read and receive a new cancel request from the free
+  /// fleet server, for commanding the robot client.
+  /// 
+  /// \param[out] cancel_request
+  ///   Newly received robot cancel request from the free fleet server,
+  ///   to be handled by the robot client.
+  /// \return
+  ///   True if a new cancel request was received, false otherwise.
+  bool read_cancel_request(
+      messages::CancelRequest& cancel_request);
 
   /// Destructor
   ~Client();

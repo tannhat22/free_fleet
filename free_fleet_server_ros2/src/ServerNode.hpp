@@ -34,6 +34,7 @@
 #include <rmf_fleet_msgs/msg/path_request.hpp>
 #include <rmf_fleet_msgs/msg/destination_request.hpp>
 #include <rmf_fleet_msgs/msg/dock_request.hpp>
+#include <rmf_fleet_msgs/msg/cancel_request.hpp>
 
 #include <free_fleet/Server.hpp>
 #include <free_fleet/messages/Location.hpp>
@@ -113,6 +114,14 @@ private:
 
   void handle_dock_request(
       rmf_fleet_msgs::msg::DockRequest::UniquePtr msg);
+
+  // --------------------------------------------------------------------------
+
+    rclcpp::Subscription<rmf_fleet_msgs::msg::CancelRequest>::SharedPtr
+      cancel_request_sub;
+
+  void handle_cancel_request(
+      rmf_fleet_msgs::msg::CancelRequest::UniquePtr msg);
 
   // --------------------------------------------------------------------------
 

@@ -68,11 +68,18 @@ Client::SharedPtr Client::make(const ClientConfig& _config)
               participant, &FreeFleetData_DockRequest_desc,
               _config.dds_dock_request_topic));
 
+  dds::DDSSubscribeHandler<FreeFleetData_CancelRequest>::SharedPtr
+      cancel_request_sub(
+          new dds::DDSSubscribeHandler<FreeFleetData_CancelRequest>(
+              participant, &FreeFleetData_CancelRequest_desc,
+              _config.dds_cancel_request_topic));
+
   if (!state_pub->is_ready() ||
       !mode_request_sub->is_ready() ||
       !path_request_sub->is_ready() ||
       !destination_request_sub->is_ready() ||
-      !dock_request_sub->is_ready())
+      !dock_request_sub->is_ready() ||
+      !cancel_request_sub->is_ready())
     return nullptr;
 
   client->impl->start(ClientImpl::Fields{
@@ -81,7 +88,8 @@ Client::SharedPtr Client::make(const ClientConfig& _config)
       std::move(mode_request_sub),
       std::move(path_request_sub),
       std::move(destination_request_sub),
-      std::move(dock_request_sub)});
+      std::move(dock_request_sub),
+      std::move(cancel_request_sub)});
   return client;
 }
 
@@ -118,6 +126,12 @@ bool Client::read_dock_request(
     messages::DockRequest& _dock_request)
 {
   return impl->read_dock_request(_dock_request);
+}
+
+bool Client::read_cancel_request(
+    messages::CancelRequest& _cancel_request)
+{
+  return impl->read_cancel_request(_cancel_request);
 }
 
 } // namespace free_fleet

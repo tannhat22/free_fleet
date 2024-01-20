@@ -23,6 +23,7 @@
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
+#include <free_fleet/messages/CancelRequest.hpp>
 #include <free_fleet/Client.hpp>
 #include <free_fleet/ClientConfig.hpp>
 
@@ -64,6 +65,10 @@ public:
     /// DDS subscriber for dock requests coming from the server
     dds::DDSSubscribeHandler<FreeFleetData_DockRequest>::SharedPtr
         dock_request_sub;
+
+    /// DDS subscriber for cancel requests coming from the server
+    dds::DDSSubscribeHandler<FreeFleetData_CancelRequest>::SharedPtr
+        cancel_request_sub;
   };
 
   ClientImpl(const ClientConfig& config);
@@ -81,6 +86,8 @@ public:
   bool read_destination_request(messages::DestinationRequest& destination_request);
   
   bool read_dock_request(messages::DockRequest& dock_request);
+
+  bool read_cancel_request(messages::CancelRequest& cancel_request);
 
 private:
 

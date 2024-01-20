@@ -10,7 +10,8 @@ module FreeFleetData
     const unsigned long MODE_EMERGENCY = 5;
     const unsigned long MODE_GOING_HOME = 6;
     const unsigned long MODE_DOCKING = 7;
-    const unsigned long MODE_REQUEST_ERROR = 8;
+    const unsigned long MODE_ADAPTER_ERROR = 8;
+    const unsigned long MODE_REQUEST_ERROR = 10;
   };
   module DockMode_Constants
   {
@@ -87,5 +88,11 @@ module FreeFleetData
     short rotate_to_dock;
     short rotate_angle;
     short rotate_orientation;
+  };
+  struct CancelRequest
+  {
+    string fleet_name;
+    string robot_name;
+    string task_id;
   };
 };

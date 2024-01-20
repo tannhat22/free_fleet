@@ -98,4 +98,15 @@ bool Server::ServerImpl::send_dock_request(
   return sent;
 }
 
+bool Server::ServerImpl::send_cancel_request(
+    const messages::CancelRequest& _cancel_request)
+{
+  FreeFleetData_CancelRequest* new_cr = 
+      FreeFleetData_CancelRequest__alloc();
+  convert(_cancel_request, *new_cr);
+  bool sent = fields.cancel_request_pub->write(new_cr);
+  FreeFleetData_CancelRequest_free(new_cr, DDS_FREE_ALL);
+  return sent;
+}
+
 } // namespace free_fleet

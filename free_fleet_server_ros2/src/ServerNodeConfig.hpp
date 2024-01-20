@@ -35,6 +35,7 @@ struct ServerNodeConfig
   std::string path_request_topic = "path_request";
   std::string destination_request_topic = "destination_request";
   std::string dock_request_topic = "dock_request";
+  std::string cancel_request_topic = "cancel_request";
 
   int dds_domain = 42;
   std::string dds_robot_state_topic = "robot_state";
@@ -42,6 +43,7 @@ struct ServerNodeConfig
   std::string dds_path_request_topic = "path_request";
   std::string dds_destination_request_topic = "destination_request";
   std::string dds_dock_request_topic = "dock_request";
+  std::string dds_cancel_request_topic = "cancel_request";
 
   double update_state_frequency = 10.0;
   double publish_state_frequency = 10.0;

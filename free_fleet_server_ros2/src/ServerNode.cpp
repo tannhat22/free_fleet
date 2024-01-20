@@ -26,6 +26,7 @@
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
+#include <free_fleet/messages/CancelRequest.hpp>
 
 #include "utilities.hpp"
 #include "ServerNode.hpp"
@@ -102,30 +103,18 @@ void ServerNode::setup_config()
   get_parameter("fleet_state_topic", server_node_config.fleet_state_topic);
   get_parameter("mode_request_topic", server_node_config.mode_request_topic);
   get_parameter("path_request_topic", server_node_config.path_request_topic);
-  get_parameter(
-      "destination_request_topic",
-      server_node_config.destination_request_topic);
-  get_parameter(
-      "dock_request_topic",
-      server_node_config.dock_request_topic);
+  get_parameter("destination_request_topic", server_node_config.destination_request_topic);
+  get_parameter("dock_request_topic", server_node_config.dock_request_topic);
+  get_parameter("cancel_request_topic", server_node_config.cancel_request_topic);
   get_parameter("dds_domain", server_node_config.dds_domain);
-  get_parameter("dds_robot_state_topic",
-      server_node_config.dds_robot_state_topic);
-  get_parameter("dds_mode_request_topic",
-      server_node_config.dds_mode_request_topic);
-  get_parameter("dds_path_request_topic",
-      server_node_config.dds_path_request_topic);
-  get_parameter(
-      "dds_destination_request_topic",
-      server_node_config.dds_destination_request_topic);
-  get_parameter(
-      "dds_dock_request_topic",
-      server_node_config.dds_dock_request_topic);
-  get_parameter("update_state_frequency",
-      server_node_config.update_state_frequency);
-  get_parameter(
-      "publish_state_frequency", server_node_config.publish_state_frequency);
-
+  get_parameter("dds_robot_state_topic", server_node_config.dds_robot_state_topic);
+  get_parameter("dds_mode_request_topic", server_node_config.dds_mode_request_topic);
+  get_parameter("dds_path_request_topic", server_node_config.dds_path_request_topic);
+  get_parameter("dds_destination_request_topic", server_node_config.dds_destination_request_topic);
+  get_parameter("dds_dock_request_topic", server_node_config.dds_dock_request_topic);
+  get_parameter("dds_cancel_request_topic", server_node_config.dds_cancel_request_topic);
+  get_parameter("update_state_frequency", server_node_config.update_state_frequency);
+  get_parameter("publish_state_frequency", server_node_config.publish_state_frequency);
   get_parameter("translation_x", server_node_config.translation_x);
   get_parameter("translation_y", server_node_config.translation_y);
   get_parameter("rotation", server_node_config.rotation);
@@ -238,6 +227,22 @@ void ServerNode::start(Fields _fields)
             handle_dock_request(std::move(msg));
           },
           dock_request_sub_opt);
+
+  // --------------------------------------------------------------------------
+  // Cancel reqeust handling
+
+  auto cancel_request_sub_opt = rclcpp::SubscriptionOptions();
+
+  cancel_request_sub_opt.callback_group = fleet_state_pub_callback_group;
+
+  cancel_request_sub =
+      create_subscription<rmf_fleet_msgs::msg::CancelRequest>(
+          server_node_config.cancel_request_topic, rclcpp::QoS(10),
+          [&](rmf_fleet_msgs::msg::CancelRequest::UniquePtr msg)
+          {
+            handle_cancel_request(std::move(msg));
+          },
+          cancel_request_sub_opt);
 }
 
 bool ServerNode::is_request_valid(
@@ -376,6 +381,14 @@ void ServerNode::handle_dock_request(
   messages::DockRequest ff_msg;
   to_ff_message(*(_msg.get()), ff_msg);
   fields.server->send_dock_request(ff_msg);
+}
+
+void ServerNode::handle_cancel_request(
+    rmf_fleet_msgs::msg::CancelRequest::UniquePtr _msg)
+{
+  messages::CancelRequest ff_msg;
+  to_ff_message(*(_msg.get()), ff_msg);
+  fields.server->send_cancel_request(ff_msg);
 }
 
 void ServerNode::update_state_callback()

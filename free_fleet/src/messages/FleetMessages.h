@@ -25,7 +25,8 @@ extern "C" {
 #define FreeFleetData_RobotMode_Constants_MODE_EMERGENCY 5
 #define FreeFleetData_RobotMode_Constants_MODE_GOING_HOME 6
 #define FreeFleetData_RobotMode_Constants_MODE_DOCKING 7
-#define FreeFleetData_RobotMode_Constants_MODE_REQUEST_ERROR 8
+#define FreeFleetData_RobotMode_Constants_MODE_ADAPTER_ERROR 8
+#define FreeFleetData_RobotMode_Constants_MODE_REQUEST_ERROR 10
 #define FreeFleetData_DockMode_Constants_MODE_IDLE 0
 #define FreeFleetData_DockMode_Constants_MODE_CHARGE 1
 #define FreeFleetData_DockMode_Constants_MODE_PICKUP 2
@@ -231,6 +232,22 @@ extern const dds_topic_descriptor_t FreeFleetData_DockRequest_desc;
 
 #define FreeFleetData_DockRequest_free(d,o) \
 dds_sample_free ((d), &FreeFleetData_DockRequest_desc, (o))
+
+
+typedef struct FreeFleetData_CancelRequest
+{
+  char * fleet_name;
+  char * robot_name;
+  char * task_id;
+} FreeFleetData_CancelRequest;
+
+extern const dds_topic_descriptor_t FreeFleetData_CancelRequest_desc;
+
+#define FreeFleetData_CancelRequest__alloc() \
+((FreeFleetData_CancelRequest*) dds_alloc (sizeof (FreeFleetData_CancelRequest)));
+
+#define FreeFleetData_CancelRequest_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_CancelRequest_desc, (o))
 
 #ifdef __cplusplus
 }

@@ -88,6 +88,15 @@ void to_ff_message(
   _out_msg.rotate_orientation = _in_msg.rotate_orientation;
 }
 
+void to_ff_message(
+    const rmf_fleet_msgs::msg::CancelRequest& _in_msg, 
+    messages::CancelRequest& _out_msg)
+{
+  _out_msg.fleet_name = _in_msg.fleet_name;
+  _out_msg.robot_name = _in_msg.robot_name;
+  _out_msg.task_id = _in_msg.task_id;
+}
+
 void to_ros_message(
     const messages::Location& _in_msg,
     rmf_fleet_msgs::msg::Location& _out_msg)

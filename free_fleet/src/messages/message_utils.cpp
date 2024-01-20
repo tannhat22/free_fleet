@@ -238,5 +238,23 @@ void convert(
   _output.rotate_orientation = _input.rotate_orientation;
 }
 
+void convert(
+    const CancelRequest& _input, 
+    FreeFleetData_CancelRequest& _output)
+{
+  _output.fleet_name = common::dds_string_alloc_and_copy(_input.fleet_name);
+  _output.robot_name = common::dds_string_alloc_and_copy(_input.robot_name);
+  _output.task_id = common::dds_string_alloc_and_copy(_input.task_id);
+}
+
+void convert(
+    const FreeFleetData_CancelRequest& _input,
+    CancelRequest& _output)
+{
+  _output.fleet_name = std::string(_input.fleet_name);
+  _output.robot_name = std::string(_input.robot_name);
+  _output.task_id = std::string(_input.task_id);
+}
+
 } // namespace messages
 } // namespace free_fleet

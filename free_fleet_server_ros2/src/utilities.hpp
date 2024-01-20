@@ -24,6 +24,7 @@
 #include <rmf_fleet_msgs/msg/path_request.hpp>
 #include <rmf_fleet_msgs/msg/destination_request.hpp>
 #include <rmf_fleet_msgs/msg/dock_request.hpp>
+#include <rmf_fleet_msgs/msg/cancel_request.hpp>
 
 #include <free_fleet/messages/Location.hpp>
 #include <free_fleet/messages/RobotState.hpp>
@@ -31,6 +32,7 @@
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
+#include <free_fleet/messages/CancelRequest.hpp>
 
 namespace free_fleet
 {
@@ -55,6 +57,10 @@ void to_ff_message(
 void to_ff_message(
     const rmf_fleet_msgs::msg::DockRequest& in_msg, 
     messages::DockRequest& out_msg);
+
+void to_ff_message(
+    const rmf_fleet_msgs::msg::CancelRequest& in_msg, 
+    messages::CancelRequest& out_msg);
 
 // ----------------------------------------------------------------------------
 

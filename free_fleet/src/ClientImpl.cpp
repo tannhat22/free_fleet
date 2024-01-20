@@ -96,4 +96,16 @@ bool Client::ClientImpl::read_dock_request(
   return false;
 }
 
+bool Client::ClientImpl::read_cancel_request(
+    messages::CancelRequest& _cancel_request)
+{
+  auto cancel_requests = fields.cancel_request_sub->read();
+  if (!cancel_requests.empty())
+  {
+    convert(*(cancel_requests[0]), _cancel_request);
+    return true;
+  }
+  return false;
+}
+
 } // namespace free_fleet

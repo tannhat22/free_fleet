@@ -39,16 +39,16 @@ void ServerNodeConfig::print_config() const
   printf("    path request: %s\n", path_request_topic.c_str());
   printf("    destination request: %s\n", destination_request_topic.c_str());
   printf("    dock request: %s\n", dock_request_topic.c_str());
+  printf("    cancel request: %s\n", cancel_request_topic.c_str());
   printf("SERVER-CLIENT DDS CONFIGURATION\n");
   printf("  dds domain: %d\n", dds_domain);
   printf("  TOPICS\n");
   printf("    robot state: %s\n", dds_robot_state_topic.c_str());
   printf("    mode request: %s\n", dds_mode_request_topic.c_str());
   printf("    path request: %s\n", dds_path_request_topic.c_str());
-  printf("    destination request: %s\n",
-      dds_destination_request_topic.c_str());
-  printf("    dock request: %s\n",
-      dds_dock_request_topic.c_str());
+  printf("    destination request: %s\n", dds_destination_request_topic.c_str());
+  printf("    dock request: %s\n", dds_dock_request_topic.c_str());
+  printf("    cancel request: %s\n", dds_cancel_request_topic.c_str());
   printf("COORDINATE TRANSFORMATION\n");
   printf("  translation x (meters): %.3f\n", translation_x);
   printf("  translation y (meters): %.3f\n", translation_y);
@@ -65,6 +65,7 @@ ServerConfig ServerNodeConfig::get_server_config() const
   server_config.dds_path_request_topic = dds_path_request_topic;
   server_config.dds_destination_request_topic = dds_destination_request_topic;
   server_config.dds_dock_request_topic = dds_dock_request_topic;
+  server_config.dds_cancel_request_topic = dds_cancel_request_topic;
   return server_config;
 }
 

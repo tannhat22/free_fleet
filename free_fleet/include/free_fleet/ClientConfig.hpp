@@ -30,6 +30,7 @@ struct ClientConfig
   std::string dds_path_request_topic = "path_request";
   std::string dds_destination_request_topic = "destination_request";
   std::string dds_dock_request_topic = "dock_request";
+  std::string dds_cancel_request_topic = "cancel_request";
 
   void print_config() const;
 };

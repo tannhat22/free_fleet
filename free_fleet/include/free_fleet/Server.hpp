@@ -28,6 +28,7 @@
 #include <free_fleet/messages/PathRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
+#include <free_fleet/messages/CancelRequest.hpp>
 
 namespace free_fleet {
 
@@ -92,6 +93,16 @@ public:
   ///   True if the dock request was successfully sent, false otherwise.
   bool send_dock_request(
       const messages::DockRequest& dock_request);
+
+  /// Attempts to send a new cancel request to all the clients. Clients 
+  /// are in charge to identify if requests are targetted towards them.
+  ///
+  /// \param[in] cancel_request
+  ///   New cancel request to be sent out to the clients.
+  /// \return
+  ///   True if the cancel request was successfully sent, false otherwise.
+  bool send_cancel_request(
+      const messages::CancelRequest& cancel_request);
 
   /// Destructor
   ~Server();

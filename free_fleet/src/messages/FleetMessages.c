@@ -264,3 +264,25 @@ const dds_topic_descriptor_t FreeFleetData_DockRequest_desc =
   FreeFleetData_DockRequest_ops,
   "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"DockMode\"><Member name=\"mode\"><ULong/></Member></Struct><Struct name=\"DockRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"dock_mode\"><Type name=\"DockMode\"/></Member><Member name=\"custom_docking\"><Boolean/></Member><Member name=\"rotate_to_dock\"><Short/></Member><Member name=\"rotate_angle\"><Short/></Member><Member name=\"rotate_orientation\"><Short/></Member></Struct></Module></MetaData>"
 };
+
+
+static const uint32_t FreeFleetData_CancelRequest_ops [] =
+{
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, fleet_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, robot_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, task_id),
+  DDS_OP_RTS
+};
+
+const dds_topic_descriptor_t FreeFleetData_CancelRequest_desc =
+{
+  sizeof (FreeFleetData_CancelRequest),
+  sizeof (char *),
+  DDS_TOPIC_NO_OPTIMIZE,
+  0u,
+  "FreeFleetData::CancelRequest",
+  NULL,
+  4,
+  FreeFleetData_CancelRequest_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"CancelRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"task_id\"><String/></Member></Struct></Module></MetaData>"
+};
