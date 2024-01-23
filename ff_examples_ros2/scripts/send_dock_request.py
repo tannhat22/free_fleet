@@ -99,8 +99,9 @@ def main(argv = sys.argv):
         return
   
     msg.custom_docking = False
-    # msg.rotate_angle = 90
-    # msg.rotate_orientation = 1
+    msg.rotate_to_dock = -90
+    msg.rotate_angle = 0
+    msg.rotate_orientation = 0
 
     rclpy.spin_once(node, timeout_sec=1.0)
     pub.publish(msg)

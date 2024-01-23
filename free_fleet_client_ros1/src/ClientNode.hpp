@@ -27,11 +27,12 @@
 
 #include <ros/ros.h>
 #include <std_msgs/String.h>
-#include <std_srvs/Trigger.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Empty.h>
 #include <sensor_msgs/BatteryState.h>
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <amr_v3_msgs/ErrorMode.h>
 
 #include <amr_v3_autodocking/AutoDockingGoal.h>
 #include <amr_v3_autodocking/AutoDockingAction.h>
@@ -67,9 +68,6 @@ public:
       actionlib::SimpleActionClient<follow_waypoints::FollowWaypointsAction>;
   using FollowWaypointsClientSharedPtr = std::shared_ptr<FollowWaypointsClient>;
 
-  using MoveBaseClient = 
-      actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>;
-  using MoveBaseClientSharedPtr = std::shared_ptr<MoveBaseClient>;
   using GoalState = actionlib::SimpleClientGoalState;
 
   static SharedPtr make(const ClientNodeConfig& config);
@@ -81,17 +79,12 @@ public:
     /// Free fleet client
     Client::SharedPtr client;
 
-    /// move base action client
-    MoveBaseClientSharedPtr move_base_client;
 
     /// follow waypoints action client
     FollowWaypointsClientSharedPtr follow_waypoints_client;
 
     /// autodock action client
     AutoDockClientSharedPtr autodock_client;
-
-    /// Docking server client
-    std::unique_ptr<ros::ServiceClient> docking_trigger_client;
   };
 
   void print_config();
@@ -112,13 +105,17 @@ private:
     // Publisher:
   ros::Publisher cmd_runonce_pub;
   ros::Publisher cmd_brake_pub;
+  ros::Publisher cmd_cancel_pub;
+  ros::Publisher mode_error_pub;
 
     // Subcriber:
   ros::Subscriber emergency_stop_sub;
   ros::Subscriber cmd_pause_amr_sub;
+  ros::Subscriber cmd_reset_amr_sub;
 
   void emergency_stop_callback(const std_msgs::Bool& msg);
   void cmd_pause_amr_callback(const std_msgs::Bool& msg);
+  void cmd_reset_error_amr_callback(const std_msgs::Empty& msg);
   // --------------------------------------------------------------------------
   // Battery handling
 
@@ -179,6 +176,11 @@ private:
   bool read_dock_request();
 
   // --------------------------------------------------------------------------
+  // Cancel request handling
+
+  bool read_cancel_request();
+
+  // --------------------------------------------------------------------------
   // Task handling
 
   bool is_valid_request(
@@ -188,6 +190,9 @@ private:
 
   move_base_msgs::MoveBaseGoal location_to_move_base_goal(
       const messages::Location& location) const;
+
+  follow_waypoints::FollowWaypointsGoal location_to_follow_waypoints_goal(
+      const messages::Location& locations) const;
 
   follow_waypoints::FollowWaypointsGoal location_to_follow_waypoints_goal(
       const std::vector<messages::Location>& locations) const;
@@ -259,6 +264,10 @@ private:
   void cmd_runonce(bool run);
 
   void cmd_brake(bool brake);
+
+  void cmd_cancel(bool cancel);
+
+  void error_mode_handle(uint32_t error_mode);
 
   // --------------------------------------------------------------------------
   // Threads and thread functions

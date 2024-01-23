@@ -77,14 +77,15 @@ void ClientNodeConfig::print_config() const
       max_dist_to_first_waypoint);
   printf("  TOPICS\n");
   printf("    cmd_runonce: %s\n", cmd_runonce_topic.c_str());
+  printf("    cmd_cancel: %s\n", cmd_cancel_topic.c_str());
   printf("    cmd_pause: %s\n", cmd_pause_topic.c_str());
+  printf("    cmd_reset: %s\n", cmd_reset_topic.c_str());
   printf("    cmd_breaker: %s\n", cmd_breaker_topic.c_str());
+  printf("    mode_error: %s\n", mode_error_topic.c_str());
   printf("    emergency stop: %s\n", emergency_stop_topic.c_str());
   printf("    battery state: %s\n", battery_state_topic.c_str());
-  printf("    move base server: %s\n", move_base_server_name.c_str());
   printf("    follow waypoints server: %s\n", follow_waypoints_server_name.c_str());
   printf("    autodock server: %s\n", autodock_server_name.c_str());
-  printf("    docking trigger server: %s\n", docking_trigger_server_name.c_str());
   printf("  ROBOT FRAMES\n");
   printf("    map frame: %s\n", map_frame.c_str());
   printf("    robot frame: %s\n", robot_frame.c_str());
@@ -94,10 +95,9 @@ void ClientNodeConfig::print_config() const
   printf("    robot state: %s\n", dds_state_topic.c_str());
   printf("    mode request: %s\n", dds_mode_request_topic.c_str());
   printf("    path request: %s\n", dds_path_request_topic.c_str());
-  printf("    destination request: %s\n", 
-      dds_destination_request_topic.c_str());
-  printf("    dock request: %s\n", 
-      dds_dock_request_topic.c_str());
+  printf("    destination request: %s\n", dds_destination_request_topic.c_str());
+  printf("    dock request: %s\n", dds_dock_request_topic.c_str());
+  printf("    cancel request: %s\n", dds_cancel_request_topic.c_str());
 }
   
 ClientConfig ClientNodeConfig::get_client_config() const
@@ -109,6 +109,7 @@ ClientConfig ClientNodeConfig::get_client_config() const
   client_config.dds_path_request_topic = dds_path_request_topic;
   client_config.dds_destination_request_topic = dds_destination_request_topic;
   client_config.dds_dock_request_topic = dds_dock_request_topic;
+  client_config.dds_cancel_request_topic = dds_cancel_request_topic;
   return client_config;
 }
 
@@ -127,9 +128,15 @@ ClientNodeConfig ClientNodeConfig::make()
   config.get_param_if_available(
       node_private_ns, "cmd_runonce_topic", config.cmd_runonce_topic);
   config.get_param_if_available(
+      node_private_ns, "cmd_cancel_topic", config.cmd_cancel_topic);
+  config.get_param_if_available(
       node_private_ns, "cmd_pause_topic", config.cmd_pause_topic);
   config.get_param_if_available(
+      node_private_ns, "cmd_reset_topic", config.cmd_reset_topic);
+  config.get_param_if_available(
       node_private_ns, "cmd_breaker_topic", config.cmd_breaker_topic);
+  config.get_param_if_available(
+      node_private_ns, "mode_error_topic", config.mode_error_topic);
   config.get_param_if_available(
       node_private_ns, "emergency_stop_topic", config.emergency_stop_topic);
   config.get_param_if_available(
@@ -139,13 +146,9 @@ ClientNodeConfig ClientNodeConfig::make()
   config.get_param_if_available(
       node_private_ns, "robot_frame", config.robot_frame);
   config.get_param_if_available(
-      node_private_ns, "move_base_server_name", config.move_base_server_name);
-  config.get_param_if_available(
       node_private_ns, "follow_waypoints_server_name", config.follow_waypoints_server_name);
   config.get_param_if_available(
       node_private_ns, "autodock_server_name", config.autodock_server_name);
-  config.get_param_if_available(
-      node_private_ns, "docking_trigger_server_name", config.docking_trigger_server_name);
   config.get_param_if_available(
       node_private_ns, "dds_domain", config.dds_domain);
   config.get_param_if_available(
@@ -158,6 +161,9 @@ ClientNodeConfig ClientNodeConfig::make()
   config.get_param_if_available(
       node_private_ns, "dds_dock_request_topic", 
       config.dds_dock_request_topic);
+  config.get_param_if_available(
+      node_private_ns, "dds_cancel_request_topic", 
+      config.dds_cancel_request_topic);
   config.get_param_if_available(
       node_private_ns, "wait_timeout", config.wait_timeout);
   config.get_param_if_available(

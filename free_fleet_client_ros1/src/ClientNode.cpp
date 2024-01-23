@@ -35,20 +35,6 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
   if (!client)
     return nullptr;
 
-  /// Setting up the move base action client, wait for server
-  ROS_INFO("waiting for connection with move base action server: %s",
-      _config.move_base_server_name.c_str());
-  MoveBaseClientSharedPtr move_base_client(
-      new MoveBaseClient(_config.move_base_server_name, true));
-  if (!move_base_client->waitForServer(ros::Duration(_config.wait_timeout)))
-  {
-    ROS_ERROR("timed out waiting for action server: %s",
-        _config.move_base_server_name.c_str());
-    return nullptr;
-  }
-  ROS_INFO("connected with move base action server: %s",
-      _config.move_base_server_name.c_str());
-  /////////////////////////////////////////////////////////////
 
   /// Setting up the follow waypoints action client, wait for server
   ROS_INFO("waiting for connection with follow waypoints action server: %s",
@@ -80,30 +66,10 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
       _config.autodock_server_name.c_str());
   /////////////////////////////////////////////////////////////
 
-  /// Setting up the docking server client, if required, wait for server
-  std::unique_ptr<ros::ServiceClient> docking_trigger_client = nullptr;
-  if (_config.docking_trigger_server_name != "")
-  {
-    docking_trigger_client =
-      std::make_unique<ros::ServiceClient>(
-        client_node->node->serviceClient<std_srvs::Trigger>(
-          _config.docking_trigger_server_name, true));
-    if (!docking_trigger_client->waitForExistence(
-      ros::Duration(_config.wait_timeout)))
-    {
-      ROS_ERROR("timed out waiting for docking trigger server: %s",
-        _config.docking_trigger_server_name.c_str());
-      return nullptr;
-    }
-  }
-  /////////////////////////////////////////////////////////////
-
   client_node->start(Fields{
       std::move(client),
-      std::move(move_base_client),
       std::move(follow_waypoints_client),
       std::move(autodock_client),
-      std::move(docking_trigger_client)
   });
 
   return client_node;
@@ -150,15 +116,28 @@ void ClientNode::start(Fields _fields)
   cmd_brake_pub = node->advertise<std_msgs::Bool>(
     client_node_config.cmd_breaker_topic, 10);
 
-  // Pause sub
-  cmd_pause_amr_sub = node->subscribe(
-      client_node_config.cmd_pause_topic, 1,
-      &ClientNode::cmd_pause_amr_callback, this);
+  // Cancel pub
+  cmd_cancel_pub = node->advertise<std_msgs::Empty>(
+    client_node_config.cmd_cancel_topic, 10);
+
+  // Error mode pub
+  mode_error_pub = node->advertise<amr_v3_msgs::ErrorMode>(
+    client_node_config.mode_error_topic, 10);
 
   // Emergency stop sub
   emergency_stop_sub = node->subscribe(
       client_node_config.emergency_stop_topic, 1,
       &ClientNode::emergency_stop_callback, this);
+
+  // Pause sub
+  cmd_pause_amr_sub = node->subscribe(
+      client_node_config.cmd_pause_topic, 1,
+      &ClientNode::cmd_pause_amr_callback, this);
+
+  // Reset error sub
+  cmd_reset_amr_sub = node->subscribe(
+      client_node_config.cmd_reset_topic, 1,
+      &ClientNode::cmd_reset_error_amr_callback, this);
 
   // Battery state sub 
   battery_percent_sub = node->subscribe(
@@ -183,9 +162,12 @@ void ClientNode::emergency_stop_callback(
 {
   emergency = _msg.data;
   if (emergency) {
+    fields.follow_waypoints_client->cancelAllGoals();
     WriteLock goal_path_lock(goal_path_mutex);
     goal_path.clear();
+    reset_waypoints_path();
 
+    fields.autodock_client->cancelAllGoals();
     WriteLock dock_goal_lock(dock_goal_mutex);
     reset_autodock_goal();
 
@@ -193,6 +175,10 @@ void ClientNode::emergency_stop_callback(
       cmd_runonce(false);
       state_runonce = false;
     }  
+
+    if (paused) {
+      paused = false;
+    }
   }
 }
 
@@ -201,8 +187,7 @@ void ClientNode::cmd_pause_amr_callback(
 {
   if (paused != _msg.data) {
     if (_msg.data) {
-      fields.move_base_client->cancelAllGoals();
-      // fields.follow_waypoints_client->cancelAllGoals();
+      fields.follow_waypoints_client->cancelAllGoals();
       WriteLock goal_path_lock(goal_path_mutex);
       if (!goal_path.empty()) {
         goal_path[0].sent = false;
@@ -212,6 +197,11 @@ void ClientNode::cmd_pause_amr_callback(
     paused = _msg.data;
     // emergency = false;
   }
+}
+
+void ClientNode::cmd_reset_error_amr_callback(const std_msgs::Empty& _msg)
+{
+  request_error = false;
 }
 
 void ClientNode::battery_state_callback_fn(
@@ -372,6 +362,24 @@ move_base_msgs::MoveBaseGoal ClientNode::location_to_move_base_goal(
 }
 
 follow_waypoints::FollowWaypointsGoal ClientNode::location_to_follow_waypoints_goal(
+    const messages::Location& _locations) const
+{
+  follow_waypoints::FollowWaypointsGoal goal;
+  goal.target_poses.header.frame_id = client_node_config.map_frame;
+  goal.target_poses.header.stamp.sec = _locations.sec;
+  goal.target_poses.header.stamp.nsec = _locations.nanosec;
+  geometry_msgs::Pose pose;
+  pose.position.x = _locations.x;
+  pose.position.y = _locations.y;
+  pose.position.z = 0.0; 
+  pose.orientation = get_quat_from_yaw(_locations.yaw);
+  goal.target_poses.poses.push_back(pose);
+  goal.obey_approach_speed_limit.push_back(_locations.obey_approach_speed_limit);
+  goal.approach_speed_limit.push_back(_locations.approach_speed_limit);
+  return goal;
+}
+
+follow_waypoints::FollowWaypointsGoal ClientNode::location_to_follow_waypoints_goal(
     const std::vector<messages::Location>& _locations) const
 {
   follow_waypoints::FollowWaypointsGoal goal;
@@ -425,8 +433,7 @@ bool ClientNode::read_mode_request()
     {
       ROS_INFO("received a PAUSE command.");
 
-      fields.move_base_client->cancelAllGoals();
-      // fields.follow_waypoints_client->cancelAllGoals();
+      fields.follow_waypoints_client->cancelAllGoals();
       WriteLock goal_path_lock(goal_path_mutex);
       if (!goal_path.empty()) {
         goal_path[0].sent = false;
@@ -448,28 +455,11 @@ bool ClientNode::read_mode_request()
       paused = false;
       emergency = true;
     }
-    // else if (mode_request.mode.mode == messages::RobotMode::MODE_DOCKING)
-    // {
-    //   ROS_INFO("received a DOCKING command.");
-    //   if (fields.docking_trigger_client &&
-    //     fields.docking_trigger_client->isValid())
-    //   {
-    //     std_srvs::Trigger trigger_srv;
-    //     fields.docking_trigger_client->call(trigger_srv);
-    //     if (!trigger_srv.response.success)
-    //     {
-    //       ROS_ERROR("Failed to trigger docking sequence, message: %s.",
-    //         trigger_srv.response.message.c_str());
-    //       request_error = true;
-    //       return false;
-    //     }
-    //   }
-    // }
 
     WriteLock task_id_lock(task_id_mutex);
     current_task_id = mode_request.task_id;
 
-    request_error = false;
+    // request_error = false;
     return true;
   }
   return false;
@@ -509,12 +499,13 @@ bool ClientNode::read_path_request()
             "waiting for next valid request.\n",
             client_node_config.max_dist_to_first_waypoint);
         
-        fields.move_base_client->cancelAllGoals();
+        fields.follow_waypoints_client->cancelAllGoals();
         WriteLock goal_path_lock(goal_path_mutex);
         goal_path.clear();
         reset_waypoints_path();
 
         request_error = true;
+        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_NAVIGATION);
         // emergency = false;
         paused = false;
         return false;
@@ -553,7 +544,7 @@ bool ClientNode::read_path_request()
     if (paused)
       paused = false;
 
-    request_error = false;
+    // request_error = false;
     return true;
   }
   return false;
@@ -573,6 +564,7 @@ bool ClientNode::read_destination_request()
     
     WriteLock goal_path_lock(goal_path_mutex);
     goal_path.clear();
+    reset_waypoints_path();
     goal_path.push_back(
         Goal {
             destination_request.destination.level_name,
@@ -584,6 +576,12 @@ bool ClientNode::read_destination_request()
             ros::Time(
                 destination_request.destination.sec, 
                 destination_request.destination.nanosec)});
+    // Get waypoint path
+    waypoints_path.follow_waypoints_path = location_to_follow_waypoints_goal(destination_request.destination);
+    waypoints_path.sent = false;
+    waypoints_path.aborted_count = 0;
+    waypoints_path.goal_end_time = ros::Time(destination_request.destination.sec,
+                                             destination_request.destination.nanosec);
 
     WriteLock task_id_lock(task_id_mutex);
     current_task_id = destination_request.task_id;
@@ -591,7 +589,7 @@ bool ClientNode::read_destination_request()
     if (paused)
       paused = false;
 
-    request_error = false;
+    // request_error = false;
     return true;
   }
   return false;
@@ -642,7 +640,37 @@ bool ClientNode::read_dock_request()
     if (paused)
       paused = false;
 
-    request_error = false;
+    // request_error = false;
+    return true;
+  }
+  return false;
+}
+
+bool ClientNode::read_cancel_request()
+{
+  messages::CancelRequest cancel_request;
+  if (fields.client->read_cancel_request(cancel_request) &&
+      is_valid_request(
+          cancel_request.fleet_name, cancel_request.robot_name,
+          cancel_request.task_id))
+  {
+    ROS_INFO("received Cancel command from Server");
+    cmd_cancel(true);
+    
+    WriteLock goal_path_lock(goal_path_mutex);
+    goal_path.clear();
+    reset_waypoints_path();
+
+    WriteLock dock_goal_lock(dock_goal_mutex);
+    reset_autodock_goal();
+
+    WriteLock task_id_lock(task_id_mutex);
+    current_task_id = cancel_request.task_id;
+
+    if (paused)
+      paused = false;
+
+    // request_error = false;
     return true;
   }
   return false;
@@ -653,7 +681,8 @@ void ClientNode::read_requests()
   if (read_mode_request() || 
       read_path_request() || 
       read_destination_request() || 
-      read_dock_request())
+      read_dock_request() ||
+      read_cancel_request())
     return;
 }
 
@@ -745,6 +774,7 @@ void ClientNode::handle_requests()
           goal_path.clear();
           reset_waypoints_path();
           request_error = true;
+          error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_NAVIGATION);
           if (state_runonce) {
             cmd_runonce(false);
             cmd_brake(true);
@@ -752,6 +782,18 @@ void ClientNode::handle_requests()
           }  
           return;
         }
+      }
+      else if (current_goal_state == GoalState::PREEMPTED) {
+        ROS_INFO("Client was cancel the current path request, and await further "
+            "requests or manual intervention.");
+        goal_path.clear();
+        reset_waypoints_path();
+        if (state_runonce) {
+          cmd_runonce(false);
+          cmd_brake(true);
+          state_runonce = false;
+        }  
+        return;
       }
       else
       {
@@ -763,84 +805,12 @@ void ClientNode::handle_requests()
         goal_path.clear();
         reset_waypoints_path();
         request_error = true;
+        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_NAVIGATION);
         if (state_runonce) {
           cmd_runonce(false);
           cmd_brake(true);
           state_runonce = false;
         }  
-        return;
-      }
-    } else {
-      // Goals must have been updated since last handling, execute them now
-      if (!goal_path.front().sent)
-      {
-        ROS_INFO("sending next goal.");
-        fields.move_base_client->sendGoal(goal_path.front().goal);
-        goal_path.front().sent = true;
-        return;
-      }
-
-      // Goals have been sent, check the goal states now
-      GoalState current_goal_state = fields.move_base_client->getState();
-      if (current_goal_state == GoalState::SUCCEEDED)
-      {
-        ROS_INFO("current goal state: SUCCEEEDED.");
-
-        // By some stroke of good fortune, we may have arrived at our goal
-        // earlier than we were scheduled to reach it. If that is the case,
-        // we need to wait here until it's time to proceed.
-        if (ros::Time::now() >= goal_path.front().goal_end_time)
-        {
-          goal_path.pop_front();
-        }
-        else
-        {
-          ros::Duration wait_time_remaining =
-              goal_path.front().goal_end_time - ros::Time::now();
-          ROS_INFO(
-              "we reached our goal early! Waiting %.1f more seconds",
-              wait_time_remaining.toSec());
-        }
-        return;
-      }
-      else if (current_goal_state == GoalState::ACTIVE)
-      {
-        return;
-      }
-      else if (current_goal_state == GoalState::ABORTED)
-      {
-        goal_path.front().aborted_count++;
-
-        // TODO: parameterize the maximum number of retries.
-        if (goal_path.front().aborted_count < 5)
-        {
-          ROS_INFO("robot's navigation stack has aborted the current goal %d "
-              "times, client will trying again...",
-              goal_path.front().aborted_count);
-          fields.move_base_client->cancelGoal();
-          goal_path.front().sent = false;
-          return;
-        }
-        else
-        {
-          ROS_INFO("robot's navigation stack has aborted the current goal %d "
-              "times, please check that there is nothing in the way of the "
-              "robot, client will abort the current path request, and await "
-              "further requests.",
-              goal_path.front().aborted_count);
-          fields.move_base_client->cancelGoal();
-          goal_path.clear();
-          return;
-        }
-      }
-      else
-      {
-        ROS_INFO("Undesirable goal state: %s",
-            current_goal_state.toString().c_str());
-        ROS_INFO("Client will abort the current path request, and await further "
-            "requests or manual intervention.");
-        fields.move_base_client->cancelGoal();
-        goal_path.clear();
         return;
       }
     }
@@ -875,8 +845,7 @@ void ClientNode::handle_requests()
     if (current_goal_state == GoalState::SUCCEEDED)
     {
       ROS_INFO("Autodock goal state: SUCCEEEDED.");
-      dock_goal.start_docking = false;
-      docking = false;
+      reset_autodock_goal();
       if (state_runonce) {
           cmd_runonce(false);
           state_runonce = false;
@@ -909,9 +878,17 @@ void ClientNode::handle_requests()
             "further requests.",
             dock_goal.aborted_count);
         fields.autodock_client->cancelGoal();
-        dock_goal.start_docking = false;
-        docking = false;
         request_error = true;
+        if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_CHARGE) {
+          error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_CHARGE);
+        } else if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_PICKUP)
+        {
+          error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_PICKUP);
+        } else if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_DROPOFF)
+        {
+          error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_DROPOFF);
+        }
+        reset_autodock_goal();
         if (state_runonce) {
           cmd_runonce(false);
           cmd_brake(true);
@@ -919,6 +896,17 @@ void ClientNode::handle_requests()
         }  
         return;
       }
+    }
+    else if (current_goal_state == GoalState::PREEMPTED) {
+      ROS_INFO("Client was cancel the current docking, and await further "
+          "requests or manual intervention.");
+      reset_autodock_goal();
+      if (state_runonce) {
+        cmd_runonce(false);
+        cmd_brake(true);
+        state_runonce = false;
+      }  
+      return;
     }
     else
     {
@@ -930,6 +918,16 @@ void ClientNode::handle_requests()
       dock_goal.start_docking = false;
       docking = false;
       request_error = true;
+      if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_CHARGE) {
+        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_CHARGE);
+      } else if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_PICKUP)
+      {
+        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_PICKUP);
+      } else if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_DROPOFF)
+      {
+        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_DROPOFF);
+      }
+      reset_autodock_goal();
       if (state_runonce) {
           cmd_runonce(false);
           cmd_brake(true);
@@ -985,6 +983,21 @@ void ClientNode::cmd_brake(bool brake)
   return;
 }
 
+void ClientNode::cmd_cancel(bool cancel)
+{
+  std_msgs::Bool msg;
+  msg.data = cancel;
+  cmd_cancel_pub.publish(msg);
+  return;
+}
+
+void ClientNode::error_mode_handle(uint32_t error_mode)
+{
+  amr_v3_msgs::ErrorMode error;
+  error.mode_error = error_mode;
+  mode_error_pub.publish(error);
+} 
+
 void ClientNode::reset_waypoints_path()
 {
   waypoints_path.follow_waypoints_path.target_poses.poses.clear();
@@ -998,6 +1011,7 @@ void ClientNode::reset_autodock_goal()
   dock_goal.start_docking = false;
   dock_goal.sent = false;
   dock_goal.aborted_count = 0;
+  docking = false;
   return;
 }
 
