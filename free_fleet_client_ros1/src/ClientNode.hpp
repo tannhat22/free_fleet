@@ -105,7 +105,7 @@ private:
     // Publisher:
   ros::Publisher cmd_runonce_pub;
   ros::Publisher cmd_brake_pub;
-  ros::Publisher cmd_cancel_pub;
+  // ros::Publisher cmd_cancel_pub;
   ros::Publisher mode_error_pub;
 
     // Subcriber:
@@ -265,7 +265,7 @@ private:
 
   void cmd_brake(bool brake);
 
-  void cmd_cancel(bool cancel);
+  // void cmd_cancel(bool cancel);
 
   void error_mode_handle(uint32_t error_mode);
 

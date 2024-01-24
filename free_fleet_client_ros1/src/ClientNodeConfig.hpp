@@ -38,7 +38,7 @@ struct ClientNodeConfig
   std::string level_name = "level_name";
 
   std::string cmd_runonce_topic = "state_runonce_nav";
-  std::string cmd_cancel_topic = "CANCEL_AMR_FROM_SERVER";
+//   std::string cmd_cancel_topic = "CANCEL_AMR_FROM_SERVER";
   std::string cmd_pause_topic = "PAUSE_AMR";
   std::string cmd_reset_topic = "RESET_AMR";
   std::string cmd_breaker_topic = "cmd_brake";

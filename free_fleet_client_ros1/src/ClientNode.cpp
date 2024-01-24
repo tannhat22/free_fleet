@@ -117,8 +117,8 @@ void ClientNode::start(Fields _fields)
     client_node_config.cmd_breaker_topic, 10);
 
   // Cancel pub
-  cmd_cancel_pub = node->advertise<std_msgs::Empty>(
-    client_node_config.cmd_cancel_topic, 10);
+  // cmd_cancel_pub = node->advertise<std_msgs::Empty>(
+  //   client_node_config.cmd_cancel_topic, 10);
 
   // Error mode pub
   mode_error_pub = node->advertise<amr_v3_msgs::ErrorMode>(
@@ -655,17 +655,24 @@ bool ClientNode::read_cancel_request()
           cancel_request.task_id))
   {
     ROS_INFO("received Cancel command from Server");
-    cmd_cancel(true);
+    // cmd_cancel(true);
     
+    fields.follow_waypoints_client->cancelAllGoals();
     WriteLock goal_path_lock(goal_path_mutex);
     goal_path.clear();
     reset_waypoints_path();
 
+    fields.autodock_client->cancelAllGoals();
     WriteLock dock_goal_lock(dock_goal_mutex);
     reset_autodock_goal();
 
     WriteLock task_id_lock(task_id_mutex);
     current_task_id = cancel_request.task_id;
+
+    if (state_runonce) {
+      cmd_runonce(false);
+      state_runonce = false;
+    }
 
     if (paused)
       paused = false;
@@ -983,13 +990,13 @@ void ClientNode::cmd_brake(bool brake)
   return;
 }
 
-void ClientNode::cmd_cancel(bool cancel)
-{
-  std_msgs::Bool msg;
-  msg.data = cancel;
-  cmd_cancel_pub.publish(msg);
-  return;
-}
+// void ClientNode::cmd_cancel(bool cancel)
+// {
+//   std_msgs::Bool msg;
+//   msg.data = cancel;
+//   cmd_cancel_pub.publish(msg);
+//   return;
+// }
 
 void ClientNode::error_mode_handle(uint32_t error_mode)
 {

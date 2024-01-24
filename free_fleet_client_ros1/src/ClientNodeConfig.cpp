@@ -77,7 +77,7 @@ void ClientNodeConfig::print_config() const
       max_dist_to_first_waypoint);
   printf("  TOPICS\n");
   printf("    cmd_runonce: %s\n", cmd_runonce_topic.c_str());
-  printf("    cmd_cancel: %s\n", cmd_cancel_topic.c_str());
+//   printf("    cmd_cancel: %s\n", cmd_cancel_topic.c_str());
   printf("    cmd_pause: %s\n", cmd_pause_topic.c_str());
   printf("    cmd_reset: %s\n", cmd_reset_topic.c_str());
   printf("    cmd_breaker: %s\n", cmd_breaker_topic.c_str());
@@ -127,8 +127,8 @@ ClientNodeConfig ClientNodeConfig::make()
       node_private_ns, "level_name", config.level_name);
   config.get_param_if_available(
       node_private_ns, "cmd_runonce_topic", config.cmd_runonce_topic);
-  config.get_param_if_available(
-      node_private_ns, "cmd_cancel_topic", config.cmd_cancel_topic);
+//   config.get_param_if_available(
+//       node_private_ns, "cmd_cancel_topic", config.cmd_cancel_topic);
   config.get_param_if_available(
       node_private_ns, "cmd_pause_topic", config.cmd_pause_topic);
   config.get_param_if_available(
