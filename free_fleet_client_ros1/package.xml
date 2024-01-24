@@ -21,6 +21,7 @@
   <depend>move_base_msgs</depend>
   <depend>follow_waypoints</depend>
   <depend>amr_v3_autodocking</depend>
+  <depend>amr_v3_msgs</depend>
 
   <depend>free_fleet</depend>
 </package>

@@ -32,7 +32,7 @@
 #include <sensor_msgs/BatteryState.h>
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <amr_v3_msgs/ErrorMode.h>
+#include <amr_v3_msgs/ErrorStamped.h>
 
 #include <amr_v3_autodocking/AutoDockingGoal.h>
 #include <amr_v3_autodocking/AutoDockingAction.h>
@@ -155,6 +155,12 @@ private:
   std::atomic<bool> state_runonce;
   // std::atomic<bool> state_brake;
 
+  // Error description
+  std::string NAV_ERROR = "AMR_ERROR: NAVIGATION_ERROR!";
+  std::string DOCK_CHARGE_ERROR = "AMR_ERROR: DOCK_CHARGE_ERROR!";
+  std::string DOCK_PICKUP_ERROR = "AMR_ERROR: DOCK_PICKUP_ERROR!";
+  std::string DOCK_DROPOFF_ERROR = "AMR_ERROR: DOCK_DROPOFF_ERROR!";
+
 
   messages::RobotMode get_robot_mode();
 
@@ -267,7 +273,7 @@ private:
 
   // void cmd_cancel(bool cancel);
 
-  void error_mode_handle(uint32_t error_mode);
+  void error_mode_handle(int32_t error_mode, const std::string& description, bool nolog);
 
   // --------------------------------------------------------------------------
   // Threads and thread functions

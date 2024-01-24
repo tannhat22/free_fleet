@@ -121,7 +121,7 @@ void ClientNode::start(Fields _fields)
   //   client_node_config.cmd_cancel_topic, 10);
 
   // Error mode pub
-  mode_error_pub = node->advertise<amr_v3_msgs::ErrorMode>(
+  mode_error_pub = node->advertise<amr_v3_msgs::ErrorStamped>(
     client_node_config.mode_error_topic, 10);
 
   // Emergency stop sub
@@ -505,7 +505,7 @@ bool ClientNode::read_path_request()
         reset_waypoints_path();
 
         request_error = true;
-        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_NAVIGATION);
+        error_mode_handle(amr_v3_msgs::Error::NAVIGATION_ERROR, NAV_ERROR, false);
         // emergency = false;
         paused = false;
         return false;
@@ -781,7 +781,7 @@ void ClientNode::handle_requests()
           goal_path.clear();
           reset_waypoints_path();
           request_error = true;
-          error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_NAVIGATION);
+          error_mode_handle(amr_v3_msgs::Error::NAVIGATION_ERROR, NAV_ERROR, false);
           if (state_runonce) {
             cmd_runonce(false);
             cmd_brake(true);
@@ -812,7 +812,7 @@ void ClientNode::handle_requests()
         goal_path.clear();
         reset_waypoints_path();
         request_error = true;
-        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_NAVIGATION);
+        error_mode_handle(amr_v3_msgs::Error::NAVIGATION_ERROR, NAV_ERROR, false);
         if (state_runonce) {
           cmd_runonce(false);
           cmd_brake(true);
@@ -887,13 +887,13 @@ void ClientNode::handle_requests()
         fields.autodock_client->cancelGoal();
         request_error = true;
         if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_CHARGE) {
-          error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_CHARGE);
+          error_mode_handle(amr_v3_msgs::Error::DOCK_CHARGE_ERROR, DOCK_CHARGE_ERROR, false);
         } else if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_PICKUP)
         {
-          error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_PICKUP);
+          error_mode_handle(amr_v3_msgs::Error::DOCK_PICKUP_ERROR, DOCK_PICKUP_ERROR, false);
         } else if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_DROPOFF)
         {
-          error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_DROPOFF);
+          error_mode_handle(amr_v3_msgs::Error::DOCK_DROPOFF_ERROR, DOCK_DROPOFF_ERROR, false);
         }
         reset_autodock_goal();
         if (state_runonce) {
@@ -926,13 +926,13 @@ void ClientNode::handle_requests()
       docking = false;
       request_error = true;
       if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_CHARGE) {
-        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_CHARGE);
+        error_mode_handle(amr_v3_msgs::Error::DOCK_CHARGE_ERROR, DOCK_CHARGE_ERROR, false);
       } else if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_PICKUP)
       {
-        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_PICKUP);
+        error_mode_handle(amr_v3_msgs::Error::DOCK_PICKUP_ERROR, DOCK_PICKUP_ERROR, false);
       } else if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_DROPOFF)
       {
-        error_mode_handle(amr_v3_msgs::ErrorMode::ERROR_DOCK_DROPOFF);
+        error_mode_handle(amr_v3_msgs::Error::DOCK_DROPOFF_ERROR, DOCK_DROPOFF_ERROR, false);
       }
       reset_autodock_goal();
       if (state_runonce) {
@@ -998,10 +998,13 @@ void ClientNode::cmd_brake(bool brake)
 //   return;
 // }
 
-void ClientNode::error_mode_handle(uint32_t error_mode)
+void ClientNode::error_mode_handle(int32_t error_mode, const std::string& description, bool nolog)
 {
-  amr_v3_msgs::ErrorMode error;
-  error.mode_error = error_mode;
+  auto error = amr_v3_msgs::ErrorStamped();
+  error.header.stamp = ros::Time::now();
+  error.error.code = error_mode;
+  error.error.description = description;
+  error.error.nolog = nolog;
   mode_error_pub.publish(error);
 } 
 
