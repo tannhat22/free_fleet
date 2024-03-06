@@ -59,10 +59,13 @@ def main(argv = sys.argv):
         {"x": 2.0, "y": 2.0, "yaw": 2.0, "level_name": "B1"}]
     '''
 
-    default_fleet_name = 'fleet_name'
-    default_robot_name = 'robot_name'
+    default_fleet_name = 'amr_vdm'
+    default_robot_name = 'amr_002'
     default_task_id = 'tfuhbjndsujewsduisd'
-    default_desired_path = '[]'
+    default_desired_path = '[\
+        {"x": 0.0, "y": 0.0, "yaw": 0.0, "level_name": "L1"},\
+        {"x": 1.0, "y": 1.0, "yaw": 1.0, "level_name": "L1"},\
+        {"x": 2.0, "y": 2.0, "yaw": 2.0, "level_name": "L1"}]'
     default_topic_name = 'robot_path_requests'
 
     parser = argparse.ArgumentParser()
@@ -97,3 +100,6 @@ def main(argv = sys.argv):
 
 if __name__ == '__main__':
     main(sys.argv)
+
+
+# '[{"x": 70.0, "y": 70.0, "yaw": 0.0, "level_name": "L1"},{"x": 70.0, "y": 70.0, "yaw": 1.0, "level_name": "L1"},{"x": 70.0, "y": 70.0, "yaw": 2.0, "level_name": "L1"}]'

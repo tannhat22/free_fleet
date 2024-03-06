@@ -186,14 +186,14 @@ void ClientNode::cmd_pause_amr_callback(
     const std_msgs::Bool& _msg)
 {
   if (paused != _msg.data) {
-    if (_msg.data) {
-      fields.follow_waypoints_client->cancelAllGoals();
-      WriteLock goal_path_lock(goal_path_mutex);
-      if (!goal_path.empty()) {
-        goal_path[0].sent = false;
-        waypoints_path.sent = false;
-      }
-    }
+    // if (_msg.data) {
+    //   fields.follow_waypoints_client->cancelAllGoals();
+    //   WriteLock goal_path_lock(goal_path_mutex);
+    //   if (!goal_path.empty()) {
+    //     goal_path[0].sent = false;
+    //     waypoints_path.sent = false;
+    //   }
+    // }
     paused = _msg.data;
     // emergency = false;
   }
@@ -202,6 +202,12 @@ void ClientNode::cmd_pause_amr_callback(
 void ClientNode::cmd_reset_error_amr_callback(const std_msgs::Empty& _msg)
 {
   request_error = false;
+  WriteLock goal_path_lock(goal_path_mutex);
+  goal_path.clear();
+  reset_waypoints_path();
+
+  WriteLock dock_goal_lock(dock_goal_mutex);
+  reset_autodock_goal();
 }
 
 void ClientNode::battery_state_callback_fn(
@@ -511,7 +517,8 @@ bool ClientNode::read_path_request()
         return false;
       }
     }
-
+    
+    // fields.follow_waypoints_client->cancelAllGoals();
     WriteLock goal_path_lock(goal_path_mutex);
     int32_t waypoint_sec = 0;
     uint32_t waypoint_nanosec = 0;
@@ -671,6 +678,7 @@ bool ClientNode::read_cancel_request()
 
     if (state_runonce) {
       cmd_runonce(false);
+      cmd_brake(true);
       state_runonce = false;
     }
 
@@ -725,33 +733,45 @@ void ClientNode::handle_requests()
       GoalState current_goal_state = fields.follow_waypoints_client->getState();
       if (current_goal_state == GoalState::SUCCEEDED)
       {
-        ROS_INFO("Waypoints goal state: SUCCEEEDED.");
-        goal_path.clear();
-        reset_waypoints_path();
-        if (state_runonce) {
-          cmd_runonce(false);
-          state_runonce = false;
-        }      
-        return;
+        // ROS_INFO("Waypoints goal state: SUCCEEEDED.");
+        // goal_path.clear();
+        // reset_waypoints_path();
+        // if (state_runonce) {
+        //   cmd_runonce(false);
+        //   cmd_brake(true);
+        //   state_runonce = false;
+        // }      
+        // return;
         // By some stroke of good fortune, we may have arrived at our goal
         // earlier than we were scheduled to reach it. If that is the case,
         // we need to wait here until it's time to proceed.
-        // if (ros::Time::now() >= goal_path.front().goal_end_time)
-        // {
-        //   goal_path.clear();
-        //   reset_waypoints_path();
-        // }
-        // else
-        // {
-        //   ros::Duration wait_time_remaining =
-        //       waypoints_path.goal_end_time - ros::Time::now();
-        //   ROS_INFO(
-        //       "we reached our goal early! Waiting %.1f more seconds",
-        //       wait_time_remaining.toSec());
-        // }
-        // return;
+
+        cmd_brake(true);
+        if (ros::Time::now() >= goal_path.front().goal_end_time)
+        {
+          ROS_INFO("Waypoints goal state: SUCCEEEDED.");
+          goal_path.clear();
+          reset_waypoints_path();
+          if (state_runonce) {
+            cmd_runonce(false);
+            state_runonce = false;
+          } 
+        }
+        else
+        {
+          ros::Duration wait_time_remaining =
+              waypoints_path.goal_end_time - ros::Time::now();
+          ROS_INFO(
+              "we reached our goal early! Waiting %.1f more seconds",
+              wait_time_remaining.toSec());
+        }
+        return;
       }
       else if (current_goal_state == GoalState::ACTIVE)
+      {
+        return;
+      }
+      else if (current_goal_state == GoalState::PENDING)
       {
         return;
       }
@@ -855,6 +875,7 @@ void ClientNode::handle_requests()
       reset_autodock_goal();
       if (state_runonce) {
           cmd_runonce(false);
+          cmd_brake(true);
           state_runonce = false;
       }  
       return;
@@ -868,7 +889,7 @@ void ClientNode::handle_requests()
       dock_goal.aborted_count++;
 
       // TODO: parameterize the maximum number of retries.
-      if (dock_goal.aborted_count < 3)
+      if (dock_goal.aborted_count < 1)
       {
         ROS_INFO("robot's autodock has aborted the current goal %d "
             "times, client will trying again...",

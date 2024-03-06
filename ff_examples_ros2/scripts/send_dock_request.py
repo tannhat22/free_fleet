@@ -46,6 +46,7 @@ def main(argv = sys.argv):
     default_level_name = 'L1'
     default_mode = 'pickup'
     default_topic_name = 'robot_dock_requests'
+    default_rotate_to_dock = 90
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--fleet-name', default=default_fleet_name)
@@ -55,6 +56,7 @@ def main(argv = sys.argv):
     parser.add_argument('--yaw', default=default_desired_yaw)
     parser.add_argument('-l', '--level-name', default=default_level_name)
     parser.add_argument('-m', '--mode', default=default_mode)
+    parser.add_argument('--rot', default=default_rotate_to_dock)
     parser.add_argument('-i', '--task-id', default=default_task_id)
     parser.add_argument('-t', '--topic-name', default=default_topic_name)
     args = parser.parse_args(argv[1:])
@@ -66,6 +68,7 @@ def main(argv = sys.argv):
     print('yaw: {}'.format(args.yaw))
     print('level_name: {}'.format(args.level_name))
     print('mode: {}'.format(args.mode))
+    print('roate_to_dock: {}'.format(args.rot))
     print('task_id: {}'.format(args.task_id))
     print('topic_name: {}'.format(args.topic_name))
 
@@ -99,7 +102,7 @@ def main(argv = sys.argv):
         return
   
     msg.custom_docking = False
-    msg.rotate_to_dock = -90
+    msg.rotate_to_dock = int(args.rot)
     msg.rotate_angle = 0
     msg.rotate_orientation = 0
 
