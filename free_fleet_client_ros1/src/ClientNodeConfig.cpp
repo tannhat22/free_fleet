@@ -63,6 +63,19 @@ void ClientNodeConfig::get_param_if_available(
   }
 }
 
+void ClientNodeConfig::get_param_if_available(
+    const ros::NodeHandle& _node, const std::string& _key,
+    bool& _param_out)
+{
+  bool tmp_param;
+  if (_node.getParam(_key, tmp_param))
+  {
+    ROS_INFO("Found %s on the parameter server. Setting %s to %d.",
+        _key.c_str(), _key.c_str(), tmp_param);
+    _param_out = tmp_param;
+  }
+}
+
 void ClientNodeConfig::print_config() const
 {
   printf("ROS 1 CLIENT CONFIGURATION\n");
@@ -70,7 +83,9 @@ void ClientNodeConfig::print_config() const
   printf("  robot name: %s\n", robot_name.c_str());
   printf("  robot model: %s\n", robot_model.c_str());
   printf("  level name: %s\n", level_name.c_str());
+  printf("  wait for intialpose: %s\n", wait_for_intialpose ? "true" : "false");
   printf("  wait timeout: %.1f\n", wait_timeout);
+  printf("  wait timeout intialpose: %.1f\n", wait_timeout_intialpose);
   printf("  update request frequency: %.1f\n", update_frequency);
   printf("  publish state frequency: %.1f\n", publish_frequency);
   printf("  maximum distance to first waypoint: %.1f\n", 
@@ -84,6 +99,7 @@ void ClientNodeConfig::print_config() const
   printf("    mode_error: %s\n", mode_error_topic.c_str());
   printf("    emergency stop: %s\n", emergency_stop_topic.c_str());
   printf("    battery state: %s\n", battery_state_topic.c_str());
+  printf("    is_intialpose: %s\n", is_intialpose_topic.c_str());
   printf("    follow waypoints server: %s\n", follow_waypoints_server_name.c_str());
   printf("    autodock server: %s\n", autodock_server_name.c_str());
   printf("  ROBOT FRAMES\n");
@@ -142,6 +158,8 @@ ClientNodeConfig ClientNodeConfig::make()
   config.get_param_if_available(
       node_private_ns, "battery_state_topic", config.battery_state_topic);
   config.get_param_if_available(
+      node_private_ns, "is_intialpose_topic", config.is_intialpose_topic);
+  config.get_param_if_available(
       node_private_ns, "map_frame", config.map_frame);
   config.get_param_if_available(
       node_private_ns, "robot_frame", config.robot_frame);
@@ -165,7 +183,11 @@ ClientNodeConfig ClientNodeConfig::make()
       node_private_ns, "dds_cancel_request_topic", 
       config.dds_cancel_request_topic);
   config.get_param_if_available(
+      node_private_ns, "wait_for_intialpose", config.wait_for_intialpose);
+  config.get_param_if_available(
       node_private_ns, "wait_timeout", config.wait_timeout);
+  config.get_param_if_available(
+      node_private_ns, "wait_timeout_intialpose", config.wait_timeout_intialpose);
   config.get_param_if_available(
       node_private_ns, "update_frequency", config.update_frequency);
   config.get_param_if_available(

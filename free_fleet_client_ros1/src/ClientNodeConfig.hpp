@@ -44,6 +44,7 @@ struct ClientNodeConfig
   std::string cmd_breaker_topic = "cmd_brake";
   std::string mode_error_topic = "error_mode";
   std::string emergency_stop_topic = "emergency_stop";
+  std::string is_intialpose_topic = "is_intialpose";
 
   std::string battery_state_topic = "/battery_state";
 
@@ -53,7 +54,6 @@ struct ClientNodeConfig
   std::string follow_waypoints_server_name = "follow_waypoints_server";
   std::string autodock_server_name = "autodock";
 
-
   int dds_domain = 42;
   std::string dds_state_topic = "robot_state";
   std::string dds_mode_request_topic = "mode_request";
@@ -62,7 +62,9 @@ struct ClientNodeConfig
   std::string dds_dock_request_topic = "dock_request";
   std::string dds_cancel_request_topic = "cancel_request";
 
+  bool wait_for_intialpose = false;
   double wait_timeout = 10.0;
+  double wait_timeout_intialpose = 600.0;
   double update_frequency = 10.0;
   double publish_frequency = 1.0;
 
@@ -79,6 +81,10 @@ struct ClientNodeConfig
   void get_param_if_available(
       const ros::NodeHandle& node, const std::string& key,
       double& param_out);
+
+  void get_param_if_available(
+      const ros::NodeHandle& node, const std::string& key,
+      bool& param_out);
 
   void print_config() const;
 

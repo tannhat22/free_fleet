@@ -66,6 +66,22 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
       _config.autodock_server_name.c_str());
   /////////////////////////////////////////////////////////////
 
+  /// Wait for set initial pose
+  if (_config.wait_for_intialpose) {
+    ROS_INFO("waiting for set initial pose!");
+    ros::NodeHandle get_setpos;
+    boost::shared_ptr<std_msgs::Bool const> sharedEdge;
+    sharedEdge = ros::topic::waitForMessage<std_msgs::Bool>(_config.is_intialpose_topic, get_setpos, 
+                                                            ros::Duration(_config.wait_timeout_intialpose));
+
+    if (sharedEdge == NULL) {
+      ROS_ERROR("timed out waiting for set initial pose");
+      return nullptr;
+    }
+    ROS_INFO("Initial pose is set success will run fleet!");
+  }
+  /////////////////////////////////////////////////////////////
+
   client_node->start(Fields{
       std::move(client),
       std::move(follow_waypoints_client),
@@ -678,7 +694,7 @@ bool ClientNode::read_cancel_request()
 
     if (state_runonce) {
       cmd_runonce(false);
-      cmd_brake(true);
+      // cmd_brake(true);
       state_runonce = false;
     }
 
@@ -746,7 +762,7 @@ void ClientNode::handle_requests()
         // earlier than we were scheduled to reach it. If that is the case,
         // we need to wait here until it's time to proceed.
 
-        cmd_brake(true);
+        // cmd_brake(true);
         if (ros::Time::now() >= goal_path.front().goal_end_time)
         {
           ROS_INFO("Waypoints goal state: SUCCEEEDED.");
@@ -817,7 +833,7 @@ void ClientNode::handle_requests()
         reset_waypoints_path();
         if (state_runonce) {
           cmd_runonce(false);
-          cmd_brake(true);
+          // cmd_brake(true);
           state_runonce = false;
         }  
         return;
@@ -875,7 +891,7 @@ void ClientNode::handle_requests()
       reset_autodock_goal();
       if (state_runonce) {
           cmd_runonce(false);
-          cmd_brake(true);
+          // cmd_brake(true);
           state_runonce = false;
       }  
       return;
@@ -931,7 +947,7 @@ void ClientNode::handle_requests()
       reset_autodock_goal();
       if (state_runonce) {
         cmd_runonce(false);
-        cmd_brake(true);
+        // cmd_brake(true);
         state_runonce = false;
       }  
       return;
