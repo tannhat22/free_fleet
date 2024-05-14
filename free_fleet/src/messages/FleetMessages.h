@@ -27,11 +27,13 @@ extern "C" {
 #define FreeFleetData_RobotMode_Constants_MODE_DOCKING 7
 #define FreeFleetData_RobotMode_Constants_MODE_ADAPTER_ERROR 8
 #define FreeFleetData_RobotMode_Constants_MODE_REQUEST_ERROR 10
+#define FreeFleetData_RobotMode_Constants_MODE_WAITING_MACHINE 11
 #define FreeFleetData_DockMode_Constants_MODE_IDLE 0
 #define FreeFleetData_DockMode_Constants_MODE_CHARGE 1
 #define FreeFleetData_DockMode_Constants_MODE_PICKUP 2
 #define FreeFleetData_DockMode_Constants_MODE_DROPOFF 3
 #define FreeFleetData_DockMode_Constants_MODE_UNDOCK 4
+#define FreeFleetData_DockMode_Constants_MODE_GOOUT 5
 
 
 typedef struct FreeFleetData_RobotMode
@@ -219,6 +221,8 @@ typedef struct FreeFleetData_DockRequest
   FreeFleetData_Location destination;
   char * task_id;
   FreeFleetData_DockMode dock_mode;
+  bool machine;
+  float distance_go_out;
   bool custom_docking;
   int16_t rotate_to_dock;
   int16_t rotate_angle;

@@ -32,6 +32,7 @@
 #include <sensor_msgs/BatteryState.h>
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <amr_v3_msgs/LightMode.h>
 #include <amr_v3_msgs/ErrorStamped.h>
 
 #include <amr_v3_autodocking/AutoDockingGoal.h>
@@ -100,20 +101,24 @@ private:
 
   std::unique_ptr<ros::Rate> publish_rate;
 
+
   // --------------------------------------------------------------------------
   // Robot logic handling
     // Publisher:
   ros::Publisher cmd_runonce_pub;
   ros::Publisher cmd_brake_pub;
+  ros::Publisher light_status_pub;
   // ros::Publisher cmd_cancel_pub;
   ros::Publisher mode_error_pub;
 
     // Subcriber:
   ros::Subscriber emergency_stop_sub;
+  ros::Subscriber hand_control_sub;
   ros::Subscriber cmd_pause_amr_sub;
   ros::Subscriber cmd_reset_amr_sub;
 
   void emergency_stop_callback(const std_msgs::Bool& msg);
+  void hand_control_callback(const std_msgs::Bool& msg);
   void cmd_pause_amr_callback(const std_msgs::Bool& msg);
   void cmd_reset_error_amr_callback(const std_msgs::Empty& msg);
   // --------------------------------------------------------------------------
@@ -150,8 +155,11 @@ private:
   // TODO: figure out a better way to handle multiple triggered modes
   std::atomic<bool> request_error;
   std::atomic<bool> emergency;
+  std::atomic<bool> hand_control;
   std::atomic<bool> paused;
   std::atomic<bool> docking;
+  std::atomic<bool> is_charging;
+  std::atomic<bool> is_in_charger;
   std::atomic<bool> state_runonce;
   // std::atomic<bool> state_brake;
 
@@ -160,6 +168,8 @@ private:
   std::string DOCK_CHARGE_ERROR = "AMR_ERROR: DOCK_CHARGE_ERROR!";
   std::string DOCK_PICKUP_ERROR = "AMR_ERROR: DOCK_PICKUP_ERROR!";
   std::string DOCK_DROPOFF_ERROR = "AMR_ERROR: DOCK_DROPOFF_ERROR!";
+  std::string UNDOCK_ERROR = "AMR_ERROR: UNDOCK_ERROR!";
+
 
 
   messages::RobotMode get_robot_mode();
@@ -270,6 +280,10 @@ private:
   void cmd_runonce(bool run);
 
   void cmd_brake(bool brake);
+
+  void light_status_publish(uint8_t mode);
+
+  void undock_charger_before_process();
 
   // void cmd_cancel(bool cancel);
 

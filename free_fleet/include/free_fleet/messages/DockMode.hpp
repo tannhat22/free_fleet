@@ -31,6 +31,7 @@ struct DockMode
   static const uint32_t MODE_PICKUP = 2;
   static const uint32_t MODE_DROPOFF = 3;
   static const uint32_t MODE_UNDOCK = 4;
+  static const uint32_t MODE_GOOUT = 5;
 };
 
 } // namespace messages

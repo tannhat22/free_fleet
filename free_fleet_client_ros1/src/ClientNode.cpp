@@ -122,8 +122,10 @@ void ClientNode::start(Fields _fields)
   emergency = false;
   paused = false;
   docking = false;
+  is_charging = false;
+  is_in_charger = false;
   state_runonce = false;  
-
+  // Publishers:
   // Runonce pub
   cmd_runonce_pub = node->advertise<std_msgs::Bool>(
     client_node_config.cmd_runonce_topic, 10);
@@ -131,6 +133,10 @@ void ClientNode::start(Fields _fields)
   // Brake pub
   cmd_brake_pub = node->advertise<std_msgs::Bool>(
     client_node_config.cmd_breaker_topic, 10);
+
+  // Light status pub
+  light_status_pub = node->advertise<amr_v3_msgs::LightMode>(
+    "/amr/light_status", 10);
 
   // Cancel pub
   // cmd_cancel_pub = node->advertise<std_msgs::Empty>(
@@ -140,10 +146,15 @@ void ClientNode::start(Fields _fields)
   mode_error_pub = node->advertise<amr_v3_msgs::ErrorStamped>(
     client_node_config.mode_error_topic, 10);
 
+  // Subcribers: 
   // Emergency stop sub
   emergency_stop_sub = node->subscribe(
       client_node_config.emergency_stop_topic, 1,
       &ClientNode::emergency_stop_callback, this);
+
+  hand_control_sub = node->subscribe(
+      "/amr/HAND_CONTROL_AMR", 1,
+      &ClientNode::hand_control_callback, this);
 
   // Pause sub
   cmd_pause_amr_sub = node->subscribe(
@@ -193,10 +204,23 @@ void ClientNode::emergency_stop_callback(
     }  
 
     if (paused) {
+      light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
       paused = false;
     }
   }
 }
+
+void ClientNode::hand_control_callback(
+  const std_msgs::Bool& _msg)
+{
+  hand_control = _msg.data;
+  if (!hand_control) {
+    if (state_runonce) {
+      cmd_brake(false);
+    }  
+  }
+}
+
 
 void ClientNode::cmd_pause_amr_callback(
     const std_msgs::Bool& _msg)
@@ -231,6 +255,10 @@ void ClientNode::battery_state_callback_fn(
 {
   WriteLock battery_state_lock(battery_state_mutex);
   current_battery_state = _msg;
+  if (current_battery_state.power_supply_status ==
+      current_battery_state.POWER_SUPPLY_STATUS_CHARGING)
+      is_charging = true;
+  else is_charging = false;
 }
 
 bool ClientNode::get_robot_transform()
@@ -263,8 +291,11 @@ messages::RobotMode ClientNode::get_robot_mode()
     return messages::RobotMode{messages::RobotMode::MODE_EMERGENCY};
 
   /// Checks if robot is docking:
-  if (docking)
-    return messages::RobotMode{messages::RobotMode::MODE_DOCKING};
+  {  
+    ReadLock dock_goal_lock(dock_goal_mutex);
+    if (docking)
+      return messages::RobotMode{messages::RobotMode::MODE_DOCKING};
+  }
 
   /// Checks if robot is charging
   {
@@ -462,18 +493,21 @@ bool ClientNode::read_mode_request()
         waypoints_path.sent = false;
       }
 
+      light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_PAUSE);
       paused = true;
       // emergency = false;
     }
     else if (mode_request.mode.mode == messages::RobotMode::MODE_MOVING)
     {
       ROS_INFO("received an explicit RESUME command.");
+      light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
       paused = false;
       // emergency = false;
     }
     else if (mode_request.mode.mode == messages::RobotMode::MODE_EMERGENCY)
     {
       ROS_INFO("received an EMERGENCY command.");
+      light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
       paused = false;
       emergency = true;
     }
@@ -529,6 +563,7 @@ bool ClientNode::read_path_request()
         request_error = true;
         error_mode_handle(amr_v3_msgs::Error::NAVIGATION_ERROR, NAV_ERROR, false);
         // emergency = false;
+        light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
         paused = false;
         return false;
       }
@@ -564,8 +599,10 @@ bool ClientNode::read_path_request()
     WriteLock task_id_lock(task_id_mutex);
     current_task_id = path_request.task_id;
 
-    if (paused)
+    if (paused) {
+      light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
       paused = false;
+    }
 
     // request_error = false;
     return true;
@@ -609,8 +646,10 @@ bool ClientNode::read_destination_request()
     WriteLock task_id_lock(task_id_mutex);
     current_task_id = destination_request.task_id;
 
-    if (paused)
+    if (paused) {
+      light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
       paused = false;
+    }
 
     // request_error = false;
     return true;
@@ -660,8 +699,10 @@ bool ClientNode::read_dock_request()
     WriteLock task_id_lock(task_id_mutex);
     current_task_id = dock_request.task_id;
 
-    if (paused)
+    if (paused) {
+      light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
       paused = false;
+    }
 
     // request_error = false;
     return true;
@@ -698,8 +739,10 @@ bool ClientNode::read_cancel_request()
       state_runonce = false;
     }
 
-    if (paused)
+    if (paused) {
+      light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
       paused = false;
+    }
 
     // request_error = false;
     return true;
@@ -727,6 +770,15 @@ void ClientNode::handle_requests()
   WriteLock goal_path_lock(goal_path_mutex);
   if (!goal_path.empty())
   {
+    // Check undock first
+    {
+      ReadLock battery_state_lock(battery_state_mutex);
+      if (is_charging || is_in_charger) {
+        undock_charger_before_process();
+        return;
+      }
+    }
+
     if (waypoints_path.follow_waypoints_path.target_poses.poses.size() >= 1) {
       if (!waypoints_path.sent)
       {
@@ -863,6 +915,15 @@ void ClientNode::handle_requests()
   WriteLock dock_goal_lock(dock_goal_mutex);
   if (dock_goal.start_docking)
   {
+    // Check undock first
+    {
+      ReadLock battery_state_lock(battery_state_mutex);
+      if (is_charging || is_in_charger) {
+        undock_charger_before_process();
+        return;
+      }
+    }
+
     if (!docking)
       docking = true;
 
@@ -887,6 +948,12 @@ void ClientNode::handle_requests()
     GoalState current_goal_state = fields.autodock_client->getState();
     if (current_goal_state == GoalState::SUCCEEDED)
     {
+      // Set undock for process next
+      if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_CHARGE) {
+        WriteLock battery_state_lock(battery_state_mutex);
+        is_in_charger = true;  
+      }
+
       ROS_INFO("Autodock goal state: SUCCEEEDED.");
       reset_autodock_goal();
       if (state_runonce) {
@@ -982,6 +1049,101 @@ void ClientNode::handle_requests()
   }
 }
 
+void ClientNode::undock_charger_before_process()
+{
+  WriteLock dock_goal_lock(dock_goal_mutex);
+  {
+    if (!dock_goal.sent)
+    {
+      ROS_WARN("Robot is charging will undock first all process!");
+      if (!state_runonce) {
+        cmd_runonce(true);
+        state_runonce = true;
+      }      
+      ROS_INFO("sending undock to autodock server.");
+      amr_v3_autodocking::AutoDockingGoal undock_goal;
+      undock_goal.dock_pose.header.frame_id = client_node_config.map_frame;
+      undock_goal.dock_pose.header.stamp = ros::Time::now();
+      undock_goal.mode = amr_v3_autodocking::AutoDockingGoal::MODE_UNDOCK;
+      fields.autodock_client->sendGoal(undock_goal);
+      // goal_path.front().sent = true;
+      dock_goal.sent = true;
+      return;
+    }
+
+    // Goals have been sent, check the goal states now
+    GoalState current_goal_state = fields.autodock_client->getState();
+    if (current_goal_state == GoalState::SUCCEEDED)
+    {
+      ROS_INFO("Undock goal state: SUCCEEEDED.");
+      dock_goal.sent = false;
+      is_in_charger = false;
+      cmd_brake(false);
+      // if (state_runonce) {
+      //     cmd_runonce(false);
+      //     // cmd_brake(true);
+      //     state_runonce = false;
+      // }  
+      return;
+    }
+    else if (current_goal_state == GoalState::ACTIVE)
+    {
+      return;
+    }
+    else if (current_goal_state == GoalState::ABORTED)
+    {
+      ROS_INFO("robot's autodock has aborted the current goal %d "
+          "times, please check that there is nothing in the way of the "
+          "robot, client will abort the current undock request, and await "
+          "further requests.");
+      fields.autodock_client->cancelGoal();
+      request_error = true;
+      error_mode_handle(amr_v3_msgs::Error::UNDOCK_ERROR, UNDOCK_ERROR, false);
+      // dock_goal.sent = false;
+      goal_path.clear();
+      reset_waypoints_path();
+      reset_autodock_goal();
+      if (state_runonce) {
+        cmd_runonce(false);
+        cmd_brake(true);
+        state_runonce = false;
+      }  
+      return;
+    }
+    else if (current_goal_state == GoalState::PREEMPTED) {
+      ROS_INFO("Client was cancel the current undock, and await further "
+          "requests or manual intervention.");
+      dock_goal.sent = false;
+      if (state_runonce) {
+        cmd_runonce(false);
+        // cmd_brake(true);
+        state_runonce = false;
+      }  
+      return;
+    }
+    else
+    {
+      ROS_INFO("Undesirable goal state: %s",
+          current_goal_state.toString().c_str());
+      ROS_INFO("Client will abort the current undock request, and await further "
+          "requests or manual intervention.");
+      fields.autodock_client->cancelGoal();
+      request_error = true;
+      error_mode_handle(amr_v3_msgs::Error::UNDOCK_ERROR, UNDOCK_ERROR, false);
+      dock_goal.sent = false;
+      goal_path.clear();
+      reset_waypoints_path();
+      reset_autodock_goal();
+      if (state_runonce) {
+          cmd_runonce(false);
+          cmd_brake(true);
+          state_runonce = false;
+      }  
+      return;
+    }
+  }
+}
+
 void ClientNode::doneCb(const actionlib::SimpleClientGoalState& state,
                         const follow_waypoints::FollowWaypointsResultConstPtr& result)
 {
@@ -1024,6 +1186,14 @@ void ClientNode::cmd_brake(bool brake)
   std_msgs::Bool msg;
   msg.data = brake;
   cmd_brake_pub.publish(msg);
+  return;
+}
+
+void ClientNode::light_status_publish(uint8_t mode)
+{
+  amr_v3_msgs::LightMode msg;
+  msg.lightMode = mode;
+  light_status_pub.publish(msg);
   return;
 }
 

@@ -12,6 +12,7 @@ module FreeFleetData
     const unsigned long MODE_DOCKING = 7;
     const unsigned long MODE_ADAPTER_ERROR = 8;
     const unsigned long MODE_REQUEST_ERROR = 10;
+    const unsigned long MODE_WAITING_MACHINE = 11;
   };
   module DockMode_Constants
   {
@@ -20,6 +21,7 @@ module FreeFleetData
     const unsigned long MODE_PICKUP = 2;
     const unsigned long MODE_DROPOFF = 3;
     const unsigned long MODE_UNDOCK = 4;
+    const unsigned long MODE_GOOUT = 5;
   };
   struct RobotMode
   {
@@ -84,6 +86,8 @@ module FreeFleetData
     Location destination;
     string task_id;
     DockMode dock_mode;
+    boolean machine;
+    float distance_go_out;
     boolean custom_docking;
     short rotate_to_dock;
     short rotate_angle;
