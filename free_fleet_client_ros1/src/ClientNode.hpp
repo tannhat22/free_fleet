@@ -215,6 +215,7 @@ private:
 
   amr_v3_autodocking::AutoDockingGoal location_to_autodock_goal(
       const messages::Location& locations, const messages::DockMode& _mode,
+      const bool _machine, const float _distance_go_out,
       const bool custom_docking, const int16_t _rotate_to_dock,
       const int16_t rotate_angle, const int16_t rotate_direction) const;
 

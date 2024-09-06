@@ -455,6 +455,7 @@ follow_waypoints::FollowWaypointsGoal ClientNode::location_to_follow_waypoints_g
 
 amr_v3_autodocking::AutoDockingGoal ClientNode::location_to_autodock_goal(
       const messages::Location& _location, const messages::DockMode& _mode,
+      const bool _machine, const float _distance_go_out,
       const bool _custom_docking, const int16_t _rotate_to_dock,
       const int16_t _rotate_angle, const int16_t _rotate_direction ) const
 {
@@ -467,6 +468,8 @@ amr_v3_autodocking::AutoDockingGoal ClientNode::location_to_autodock_goal(
   goal.dock_pose.pose.position.z = 0.0;
   goal.dock_pose.pose.orientation = get_quat_from_yaw(_location.yaw);
   goal.mode = _mode.mode;
+  goal.machine = _machine;
+  goal.distance_go_out = _distance_go_out;
   goal.custom_docking = _custom_docking;
   goal.rotate_to_dock = _rotate_to_dock;
   goal.ROTATE_ANGLE = _rotate_angle;
@@ -681,6 +684,10 @@ bool ClientNode::read_dock_request()
     {
       ROS_INFO("received Dock command, mode: UNDOCK");
     }
+    else if (dock_request.dock_mode.mode == messages::DockMode::MODE_GOOUT)
+    {
+      ROS_INFO("received Dock command, mode: GOOUT");
+    }
     else {
       ROS_ERROR("received Dock command but mode does not support. Please check again!");
     }
@@ -688,6 +695,8 @@ bool ClientNode::read_dock_request()
     WriteLock dock_goal_lock(dock_goal_mutex);
     dock_goal.autodock_goal = location_to_autodock_goal(dock_request.destination,
                                                         dock_request.dock_mode,
+                                                        dock_request.machine,
+                                                        dock_request.distance_go_out,
                                                         dock_request.custom_docking,
                                                         dock_request.rotate_to_dock,
                                                         dock_request.rotate_angle,
@@ -721,13 +730,20 @@ bool ClientNode::read_cancel_request()
     ROS_INFO("received Cancel command from Server");
     // cmd_cancel(true);
     
-    fields.follow_waypoints_client->cancelAllGoals();
     WriteLock goal_path_lock(goal_path_mutex);
+    if (!goal_path.empty()) {
+      ROS_INFO("Request cancel command to follow_waypoints_server!");
+      fields.follow_waypoints_client->cancelAllGoals();
+    }
     goal_path.clear();
     reset_waypoints_path();
 
-    fields.autodock_client->cancelAllGoals();
+
     WriteLock dock_goal_lock(dock_goal_mutex);
+    if (dock_goal.start_docking) {
+      ROS_INFO("Request cancel command to autodock_server!");
+      fields.autodock_client->cancelAllGoals();
+    }
     reset_autodock_goal();
 
     WriteLock task_id_lock(task_id_mutex);
@@ -752,11 +768,11 @@ bool ClientNode::read_cancel_request()
 
 void ClientNode::read_requests()
 {
-  if (read_mode_request() || 
+  if (read_cancel_request() ||
+      read_mode_request() || 
       read_path_request() || 
       read_destination_request() || 
-      read_dock_request() ||
-      read_cancel_request())
+      read_dock_request())
     return;
 }
 
@@ -774,6 +790,7 @@ void ClientNode::handle_requests()
     {
       ReadLock battery_state_lock(battery_state_mutex);
       if (is_charging || is_in_charger) {
+        WriteLock dock_goal_lock(dock_goal_mutex);
         undock_charger_before_process();
         return;
       }
@@ -915,6 +932,7 @@ void ClientNode::handle_requests()
   WriteLock dock_goal_lock(dock_goal_mutex);
   if (dock_goal.start_docking)
   {
+
     // Check undock first
     {
       ReadLock battery_state_lock(battery_state_mutex);
@@ -1051,8 +1069,8 @@ void ClientNode::handle_requests()
 
 void ClientNode::undock_charger_before_process()
 {
-  WriteLock dock_goal_lock(dock_goal_mutex);
-  {
+  // WriteLock dock_goal_lock(dock_goal_mutex);
+  // {
     if (!dock_goal.sent)
     {
       ROS_WARN("Robot is charging will undock first all process!");
@@ -1141,7 +1159,7 @@ void ClientNode::undock_charger_before_process()
       }  
       return;
     }
-  }
+  // }
 }
 
 void ClientNode::doneCb(const actionlib::SimpleClientGoalState& state,
