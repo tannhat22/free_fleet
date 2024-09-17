@@ -26,11 +26,12 @@ struct ServerConfig
 {
   int dds_domain = 42;
   std::string dds_robot_state_topic = "robot_state";
-  std::string dds_mode_request_topic = "mode_request";
-  std::string dds_path_request_topic = "path_request";
+  std::string dds_cancel_request_topic = "cancel_request";
   std::string dds_destination_request_topic = "destination_request";
   std::string dds_dock_request_topic = "dock_request";
-  std::string dds_cancel_request_topic = "cancel_request";
+  std::string dds_localize_request_topic = "localize_request";
+  std::string dds_mode_request_topic = "mode_request";
+  std::string dds_path_request_topic = "path_request";
 
   void print_config() const;
 };

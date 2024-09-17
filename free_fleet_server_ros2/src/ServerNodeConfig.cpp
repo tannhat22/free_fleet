@@ -40,6 +40,7 @@ void ServerNodeConfig::print_config() const
   printf("    destination request: %s\n", destination_request_topic.c_str());
   printf("    dock request: %s\n", dock_request_topic.c_str());
   printf("    cancel request: %s\n", cancel_request_topic.c_str());
+  printf("    localize request: %s\n", localize_request_topic.c_str());
   printf("SERVER-CLIENT DDS CONFIGURATION\n");
   printf("  dds domain: %d\n", dds_domain);
   printf("  TOPICS\n");
@@ -49,11 +50,26 @@ void ServerNodeConfig::print_config() const
   printf("    destination request: %s\n", dds_destination_request_topic.c_str());
   printf("    dock request: %s\n", dds_dock_request_topic.c_str());
   printf("    cancel request: %s\n", dds_cancel_request_topic.c_str());
+  printf("    localize request: %s\n", dds_localize_request_topic.c_str());
   printf("COORDINATE TRANSFORMATION\n");
-  printf("  translation x (meters): %.3f\n", translation_x);
-  printf("  translation y (meters): %.3f\n", translation_y);
-  printf("  rotation (radians): %.3f\n", rotation);
-  printf("  scale: %.3f\n", scale);
+  size_t size_L = L_translation_x.size();
+  if (L_translation_y.size() == size_L &&
+      L_rotation.size() == size_L &&
+      L_scale.size() == size_L) {
+    for (size_t i = 0; i < size_L; ++i) {
+        printf("Level: L%ld:\n", i+1);
+        printf("  translation x (meters): %.3f\n", L_translation_x[i]);
+        printf("  translation y (meters): %.3f\n", L_translation_y[i]);
+        printf("  rotation (radians): %.3f\n", L_rotation[i]);
+        printf("  scale: %.3f\n", L_scale[i]);
+    }
+  } else {
+      printf("Error: Transform vectors do not have the same size!\n");
+  }
+  // printf("  translation x (meters): %.3f\n", translation_x);
+  // printf("  translation y (meters): %.3f\n", translation_y);
+  // printf("  rotation (radians): %.3f\n", rotation);
+  // printf("  scale: %.3f\n", scale);
 }
 
 ServerConfig ServerNodeConfig::get_server_config() const
@@ -66,6 +82,7 @@ ServerConfig ServerNodeConfig::get_server_config() const
   server_config.dds_destination_request_topic = dds_destination_request_topic;
   server_config.dds_dock_request_topic = dds_dock_request_topic;
   server_config.dds_cancel_request_topic = dds_cancel_request_topic;
+  server_config.dds_localize_request_topic = dds_localize_request_topic;
   return server_config;
 }
 

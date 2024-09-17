@@ -35,6 +35,7 @@
 #include <rmf_fleet_msgs/msg/destination_request.hpp>
 #include <rmf_fleet_msgs/msg/dock_request.hpp>
 #include <rmf_fleet_msgs/msg/cancel_request.hpp>
+#include <rmf_fleet_msgs/msg/localize_request.hpp>
 
 #include <free_fleet/Server.hpp>
 #include <free_fleet/messages/Location.hpp>
@@ -122,6 +123,14 @@ private:
 
   void handle_cancel_request(
       rmf_fleet_msgs::msg::CancelRequest::UniquePtr msg);
+
+  // --------------------------------------------------------------------------
+
+    rclcpp::Subscription<rmf_fleet_msgs::msg::LocalizeRequest>::SharedPtr
+      localize_request_sub;
+
+  void handle_localize_request(
+      rmf_fleet_msgs::msg::LocalizeRequest::UniquePtr msg);
 
   // --------------------------------------------------------------------------
 

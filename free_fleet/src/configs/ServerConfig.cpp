@@ -32,6 +32,7 @@ void ServerConfig::print_config() const
   printf("    destination request: %s\n", dds_destination_request_topic.c_str());
   printf("    dock request: %s\n", dds_dock_request_topic.c_str());
   printf("    cancel request: %s\n", dds_cancel_request_topic.c_str());
+  printf("    localize request: %s\n", dds_localize_request_topic.c_str());
 }
 
 } // namespace free_fleet

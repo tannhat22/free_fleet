@@ -9,26 +9,6 @@
 #include "FleetMessages.h"
 
 
-static const uint32_t FreeFleetData_RobotMode_ops [] =
-{
-  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_RobotMode, mode),
-  DDS_OP_RTS
-};
-
-const dds_topic_descriptor_t FreeFleetData_RobotMode_desc =
-{
-  sizeof (FreeFleetData_RobotMode),
-  4u,
-  0u,
-  0u,
-  "FreeFleetData::RobotMode",
-  NULL,
-  2,
-  FreeFleetData_RobotMode_ops,
-  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"RobotMode\"><Member name=\"mode\"><ULong/></Member></Struct></Module></MetaData>"
-};
-
-
 static const uint32_t FreeFleetData_DockMode_ops [] =
 {
   DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockMode, mode),
@@ -49,6 +29,26 @@ const dds_topic_descriptor_t FreeFleetData_DockMode_desc =
 };
 
 
+static const uint32_t FreeFleetData_RobotMode_ops [] =
+{
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_RobotMode, mode),
+  DDS_OP_RTS
+};
+
+const dds_topic_descriptor_t FreeFleetData_RobotMode_desc =
+{
+  sizeof (FreeFleetData_RobotMode),
+  4u,
+  0u,
+  0u,
+  "FreeFleetData::RobotMode",
+  NULL,
+  2,
+  FreeFleetData_RobotMode_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"RobotMode\"><Member name=\"mode\"><ULong/></Member></Struct></Module></MetaData>"
+};
+
+
 static const uint32_t FreeFleetData_Location_ops [] =
 {
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_Location, sec),
@@ -56,7 +56,7 @@ static const uint32_t FreeFleetData_Location_ops [] =
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, x),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, y),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, yaw),
-  DDS_OP_ADR | DDS_OP_TYPE_BOO, offsetof (FreeFleetData_Location, obey_approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_Location, obey_approach_speed_limit),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, approach_speed_limit),
   DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_Location, level_name),
   DDS_OP_RTS
@@ -88,7 +88,7 @@ static const uint32_t FreeFleetData_RobotState_ops [] =
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_RobotState, location.x),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_RobotState, location.y),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_RobotState, location.yaw),
-  DDS_OP_ADR | DDS_OP_TYPE_BOO, offsetof (FreeFleetData_RobotState, location.obey_approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_RobotState, location.obey_approach_speed_limit),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_RobotState, location.approach_speed_limit),
   DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_RobotState, location.level_name),
   DDS_OP_ADR | DDS_OP_TYPE_SEQ | DDS_OP_SUBTYPE_STU, offsetof (FreeFleetData_RobotState, path),
@@ -98,7 +98,7 @@ static const uint32_t FreeFleetData_RobotState_ops [] =
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, x),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, y),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, yaw),
-  DDS_OP_ADR | DDS_OP_TYPE_BOO, offsetof (FreeFleetData_Location, obey_approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_Location, obey_approach_speed_limit),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, approach_speed_limit),
   DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_Location, level_name),
   DDS_OP_RTS,
@@ -137,6 +137,125 @@ const dds_topic_descriptor_t FreeFleetData_ModeParameter_desc =
   3,
   FreeFleetData_ModeParameter_ops,
   "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"ModeParameter\"><Member name=\"name\"><String/></Member><Member name=\"value\"><String/></Member></Struct></Module></MetaData>"
+};
+
+
+static const uint32_t FreeFleetData_CancelRequest_ops [] =
+{
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, fleet_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, robot_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, task_id),
+  DDS_OP_RTS
+};
+
+const dds_topic_descriptor_t FreeFleetData_CancelRequest_desc =
+{
+  sizeof (FreeFleetData_CancelRequest),
+  sizeof (char *),
+  DDS_TOPIC_NO_OPTIMIZE,
+  0u,
+  "FreeFleetData::CancelRequest",
+  NULL,
+  4,
+  FreeFleetData_CancelRequest_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"CancelRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"task_id\"><String/></Member></Struct></Module></MetaData>"
+};
+
+
+static const uint32_t FreeFleetData_DestinationRequest_ops [] =
+{
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DestinationRequest, fleet_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DestinationRequest, robot_name),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DestinationRequest, destination.sec),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DestinationRequest, destination.nanosec),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DestinationRequest, destination.x),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DestinationRequest, destination.y),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DestinationRequest, destination.yaw),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_DestinationRequest, destination.obey_approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DestinationRequest, destination.approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DestinationRequest, destination.level_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DestinationRequest, task_id),
+  DDS_OP_RTS
+};
+
+const dds_topic_descriptor_t FreeFleetData_DestinationRequest_desc =
+{
+  sizeof (FreeFleetData_DestinationRequest),
+  sizeof (char *),
+  DDS_TOPIC_NO_OPTIMIZE,
+  0u,
+  "FreeFleetData::DestinationRequest",
+  NULL,
+  12,
+  FreeFleetData_DestinationRequest_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"DestinationRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member></Struct></Module></MetaData>"
+};
+
+
+static const uint32_t FreeFleetData_DockRequest_ops [] =
+{
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, fleet_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, robot_name),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, destination.sec),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockRequest, destination.nanosec),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.x),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.y),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.yaw),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_DockRequest, destination.obey_approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, destination.level_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, task_id),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockRequest, dock_mode.mode),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_DockRequest, machine),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, distance_go_out),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_DockRequest, custom_docking),
+  DDS_OP_ADR | DDS_OP_TYPE_2BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, rotate_to_dock),
+  DDS_OP_ADR | DDS_OP_TYPE_2BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, rotate_angle),
+  DDS_OP_ADR | DDS_OP_TYPE_2BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, rotate_orientation),
+  DDS_OP_RTS
+};
+
+const dds_topic_descriptor_t FreeFleetData_DockRequest_desc =
+{
+  sizeof (FreeFleetData_DockRequest),
+  sizeof (char *),
+  DDS_TOPIC_NO_OPTIMIZE,
+  0u,
+  "FreeFleetData::DockRequest",
+  NULL,
+  19,
+  FreeFleetData_DockRequest_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"DockMode\"><Member name=\"mode\"><ULong/></Member></Struct><Struct name=\"DockRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"dock_mode\"><Type name=\"DockMode\"/></Member><Member name=\"machine\"><Boolean/></Member><Member name=\"distance_go_out\"><Float/></Member><Member name=\"custom_docking\"><Boolean/></Member><Member name=\"rotate_to_dock\"><Short/></Member><Member name=\"rotate_angle\"><Short/></Member><Member name=\"rotate_orientation\"><Short/></Member></Struct></Module></MetaData>"
+};
+
+
+static const uint32_t FreeFleetData_LocalizeRequest_ops [] =
+{
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_LocalizeRequest, fleet_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_LocalizeRequest, robot_name),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_LocalizeRequest, destination.sec),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_LocalizeRequest, destination.nanosec),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_LocalizeRequest, destination.x),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_LocalizeRequest, destination.y),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_LocalizeRequest, destination.yaw),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_LocalizeRequest, destination.obey_approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_LocalizeRequest, destination.approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_LocalizeRequest, destination.level_name),
+  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_LocalizeRequest, task_id),
+  DDS_OP_RTS
+};
+
+const dds_topic_descriptor_t FreeFleetData_LocalizeRequest_desc =
+{
+  sizeof (FreeFleetData_LocalizeRequest),
+  sizeof (char *),
+  DDS_TOPIC_NO_OPTIMIZE,
+  0u,
+  "FreeFleetData::LocalizeRequest",
+  NULL,
+  12,
+  FreeFleetData_LocalizeRequest_ops,
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"LocalizeRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member></Struct></Module></MetaData>"
 };
 
 
@@ -179,7 +298,7 @@ static const uint32_t FreeFleetData_PathRequest_ops [] =
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, x),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, y),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, yaw),
-  DDS_OP_ADR | DDS_OP_TYPE_BOO, offsetof (FreeFleetData_Location, obey_approach_speed_limit),
+  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_Location, obey_approach_speed_limit),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_Location, approach_speed_limit),
   DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_Location, level_name),
   DDS_OP_RTS,
@@ -198,93 +317,4 @@ const dds_topic_descriptor_t FreeFleetData_PathRequest_desc =
   15,
   FreeFleetData_PathRequest_ops,
   "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"PathRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"path\"><Sequence><Type name=\"Location\"/></Sequence></Member><Member name=\"task_id\"><String/></Member></Struct></Module></MetaData>"
-};
-
-
-static const uint32_t FreeFleetData_DestinationRequest_ops [] =
-{
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DestinationRequest, fleet_name),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DestinationRequest, robot_name),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DestinationRequest, destination.sec),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DestinationRequest, destination.nanosec),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DestinationRequest, destination.x),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DestinationRequest, destination.y),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DestinationRequest, destination.yaw),
-  DDS_OP_ADR | DDS_OP_TYPE_BOO, offsetof (FreeFleetData_DestinationRequest, destination.obey_approach_speed_limit),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DestinationRequest, destination.approach_speed_limit),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DestinationRequest, destination.level_name),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DestinationRequest, task_id),
-  DDS_OP_RTS
-};
-
-const dds_topic_descriptor_t FreeFleetData_DestinationRequest_desc =
-{
-  sizeof (FreeFleetData_DestinationRequest),
-  sizeof (char *),
-  DDS_TOPIC_NO_OPTIMIZE,
-  0u,
-  "FreeFleetData::DestinationRequest",
-  NULL,
-  12,
-  FreeFleetData_DestinationRequest_ops,
-  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"DestinationRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member></Struct></Module></MetaData>"
-};
-
-
-static const uint32_t FreeFleetData_DockRequest_ops [] =
-{
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, fleet_name),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, robot_name),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, destination.sec),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockRequest, destination.nanosec),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.x),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.y),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.yaw),
-  DDS_OP_ADR | DDS_OP_TYPE_BOO, offsetof (FreeFleetData_DockRequest, destination.obey_approach_speed_limit),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, destination.approach_speed_limit),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, destination.level_name),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, task_id),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockRequest, dock_mode.mode),
-  DDS_OP_ADR | DDS_OP_TYPE_BOO, offsetof (FreeFleetData_DockRequest, machine),
-  DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, distance_go_out),
-  DDS_OP_ADR | DDS_OP_TYPE_BOO, offsetof (FreeFleetData_DockRequest, custom_docking),
-  DDS_OP_ADR | DDS_OP_TYPE_2BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, rotate_to_dock),
-  DDS_OP_ADR | DDS_OP_TYPE_2BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, rotate_angle),
-  DDS_OP_ADR | DDS_OP_TYPE_2BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, rotate_orientation),
-  DDS_OP_RTS
-};
-
-const dds_topic_descriptor_t FreeFleetData_DockRequest_desc =
-{
-  sizeof (FreeFleetData_DockRequest),
-  sizeof (char *),
-  DDS_TOPIC_NO_OPTIMIZE,
-  0u,
-  "FreeFleetData::DockRequest",
-  NULL,
-  19,
-  FreeFleetData_DockRequest_ops,
-  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"DockMode\"><Member name=\"mode\"><ULong/></Member></Struct><Struct name=\"DockRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"dock_mode\"><Type name=\"DockMode\"/></Member><Member name=\"machine\"><Boolean/></Member><Member name=\"distance_go_out\"><Float/></Member><Member name=\"custom_docking\"><Boolean/></Member><Member name=\"rotate_to_dock\"><Short/></Member><Member name=\"rotate_angle\"><Short/></Member><Member name=\"rotate_orientation\"><Short/></Member></Struct></Module></MetaData>"
-};
-
-
-static const uint32_t FreeFleetData_CancelRequest_ops [] =
-{
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, fleet_name),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, robot_name),
-  DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_CancelRequest, task_id),
-  DDS_OP_RTS
-};
-
-const dds_topic_descriptor_t FreeFleetData_CancelRequest_desc =
-{
-  sizeof (FreeFleetData_CancelRequest),
-  sizeof (char *),
-  DDS_TOPIC_NO_OPTIMIZE,
-  0u,
-  "FreeFleetData::CancelRequest",
-  NULL,
-  4,
-  FreeFleetData_CancelRequest_ops,
-  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"CancelRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"task_id\"><String/></Member></Struct></Module></MetaData>"
 };

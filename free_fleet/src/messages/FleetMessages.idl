@@ -1,5 +1,14 @@
 module FreeFleetData
 {
+  module DockMode_Constants
+  {
+    const unsigned long MODE_IDLE = 0;
+    const unsigned long MODE_CHARGE = 1;
+    const unsigned long MODE_PICKUP = 2;
+    const unsigned long MODE_DROPOFF = 3;
+    const unsigned long MODE_UNDOCK = 4;
+    const unsigned long MODE_GOOUT = 5;
+  };
   module RobotMode_Constants
   {
     const unsigned long MODE_IDLE = 0;
@@ -14,20 +23,11 @@ module FreeFleetData
     const unsigned long MODE_REQUEST_ERROR = 10;
     const unsigned long MODE_WAITING_MACHINE = 11;
   };
-  module DockMode_Constants
-  {
-    const unsigned long MODE_IDLE = 0;
-    const unsigned long MODE_CHARGE = 1;
-    const unsigned long MODE_PICKUP = 2;
-    const unsigned long MODE_DROPOFF = 3;
-    const unsigned long MODE_UNDOCK = 4;
-    const unsigned long MODE_GOOUT = 5;
-  };
-  struct RobotMode
+  struct DockMode
   {
     unsigned long mode;
   };
-  struct DockMode
+  struct RobotMode
   {
     unsigned long mode;
   };
@@ -57,19 +57,10 @@ module FreeFleetData
     string name;
     string value;
   };
-  struct ModeRequest
+  struct CancelRequest
   {
     string fleet_name;
     string robot_name;
-    RobotMode mode;
-    string task_id;
-    sequence<ModeParameter> parameters;
-  };
-  struct PathRequest
-  {
-    string fleet_name;
-    string robot_name;
-    sequence<Location> path;
     string task_id;
   };
   struct DestinationRequest
@@ -93,10 +84,26 @@ module FreeFleetData
     short rotate_angle;
     short rotate_orientation;
   };
-  struct CancelRequest
+  struct LocalizeRequest
   {
     string fleet_name;
     string robot_name;
+    Location destination;
+    string task_id; 
+  };
+  struct ModeRequest
+  {
+    string fleet_name;
+    string robot_name;
+    RobotMode mode;
+    string task_id;
+    sequence<ModeParameter> parameters;
+  };
+  struct PathRequest
+  {
+    string fleet_name;
+    string robot_name;
+    sequence<Location> path;
     string task_id;
   };
 };

@@ -109,4 +109,15 @@ bool Server::ServerImpl::send_cancel_request(
   return sent;
 }
 
+bool Server::ServerImpl::send_localize_request(
+    const messages::LocalizeRequest& _localize_request)
+{
+  FreeFleetData_LocalizeRequest* new_cr = 
+      FreeFleetData_LocalizeRequest__alloc();
+  convert(_localize_request, *new_cr);
+  bool sent = fields.localize_request_pub->write(new_cr);
+  FreeFleetData_LocalizeRequest_free(new_cr, DDS_FREE_ALL);
+  return sent;
+}
+
 } // namespace free_fleet

@@ -74,12 +74,19 @@ Server::SharedPtr Server::make(const ServerConfig& _config)
               participant, &FreeFleetData_CancelRequest_desc,
               _config.dds_cancel_request_topic));
 
+  dds::DDSPublishHandler<FreeFleetData_LocalizeRequest>::SharedPtr 
+      localize_request_pub(
+          new dds::DDSPublishHandler<FreeFleetData_LocalizeRequest>(
+              participant, &FreeFleetData_LocalizeRequest_desc,
+              _config.dds_localize_request_topic));
+
   if (!state_sub->is_ready() ||
       !mode_request_pub->is_ready() ||
       !path_request_pub->is_ready() ||
       !destination_request_pub->is_ready() ||
       !dock_request_pub->is_ready() ||
-      !cancel_request_pub->is_ready())
+      !cancel_request_pub->is_ready() ||
+      !localize_request_pub->is_ready())
     return nullptr;
 
   server->impl->start(ServerImpl::Fields{
@@ -89,7 +96,8 @@ Server::SharedPtr Server::make(const ServerConfig& _config)
       std::move(path_request_pub),
       std::move(destination_request_pub),
       std::move(dock_request_pub),
-      std::move(cancel_request_pub)});
+      std::move(cancel_request_pub),
+      std::move(localize_request_pub)});
   return server;
 }
 
@@ -133,6 +141,12 @@ bool Server::send_cancel_request(
     const messages::CancelRequest& _cancel_request)
 {
   return impl->send_cancel_request(_cancel_request);
+}
+
+bool Server::send_localize_request(
+    const messages::LocalizeRequest& _localize_request)
+{
+  return impl->send_localize_request(_localize_request);
 }
 
 } // namespace free_fleet

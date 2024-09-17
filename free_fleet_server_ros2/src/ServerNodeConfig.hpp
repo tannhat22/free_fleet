@@ -19,6 +19,7 @@
 #define FREE_FLEET_SERVER_ROS2__SRC__SERVERNODECONFIG_HPP
 
 #include <string>
+#include <vector>
 
 namespace free_fleet
 {
@@ -36,6 +37,7 @@ struct ServerNodeConfig
   std::string destination_request_topic = "destination_request";
   std::string dock_request_topic = "dock_request";
   std::string cancel_request_topic = "cancel_request";
+  std::string localize_request_topic = "localize_request";
 
   int dds_domain = 42;
   std::string dds_robot_state_topic = "robot_state";
@@ -44,6 +46,8 @@ struct ServerNodeConfig
   std::string dds_destination_request_topic = "destination_request";
   std::string dds_dock_request_topic = "dock_request";
   std::string dds_cancel_request_topic = "cancel_request";
+  std::string dds_localize_request_topic = "localize_request";
+
 
   double update_state_frequency = 10.0;
   double publish_state_frequency = 10.0;
@@ -52,10 +56,10 @@ struct ServerNodeConfig
   // 1) scale
   // 2) rotate
   // 3) translate
-  double scale = 1.0;
-  double rotation = 0.0;
-  double translation_x = 0.0;
-  double translation_y = 0.0;
+  std::vector<double> L_scale = {1.0, 1.0};
+  std::vector<double> L_rotation = {0.0, 0.0};
+  std::vector<double> L_translation_x = {0.0, 0.0};
+  std::vector<double> L_translation_y = {0.0, 0.0};
 
   void print_config() const;
 

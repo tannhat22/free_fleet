@@ -17,6 +17,12 @@
 extern "C" {
 #endif
 
+#define FreeFleetData_DockMode_Constants_MODE_IDLE 0
+#define FreeFleetData_DockMode_Constants_MODE_CHARGE 1
+#define FreeFleetData_DockMode_Constants_MODE_PICKUP 2
+#define FreeFleetData_DockMode_Constants_MODE_DROPOFF 3
+#define FreeFleetData_DockMode_Constants_MODE_UNDOCK 4
+#define FreeFleetData_DockMode_Constants_MODE_GOOUT 5
 #define FreeFleetData_RobotMode_Constants_MODE_IDLE 0
 #define FreeFleetData_RobotMode_Constants_MODE_CHARGING 1
 #define FreeFleetData_RobotMode_Constants_MODE_MOVING 2
@@ -28,26 +34,6 @@ extern "C" {
 #define FreeFleetData_RobotMode_Constants_MODE_ADAPTER_ERROR 8
 #define FreeFleetData_RobotMode_Constants_MODE_REQUEST_ERROR 10
 #define FreeFleetData_RobotMode_Constants_MODE_WAITING_MACHINE 11
-#define FreeFleetData_DockMode_Constants_MODE_IDLE 0
-#define FreeFleetData_DockMode_Constants_MODE_CHARGE 1
-#define FreeFleetData_DockMode_Constants_MODE_PICKUP 2
-#define FreeFleetData_DockMode_Constants_MODE_DROPOFF 3
-#define FreeFleetData_DockMode_Constants_MODE_UNDOCK 4
-#define FreeFleetData_DockMode_Constants_MODE_GOOUT 5
-
-
-typedef struct FreeFleetData_RobotMode
-{
-  uint32_t mode;
-} FreeFleetData_RobotMode;
-
-extern const dds_topic_descriptor_t FreeFleetData_RobotMode_desc;
-
-#define FreeFleetData_RobotMode__alloc() \
-((FreeFleetData_RobotMode*) dds_alloc (sizeof (FreeFleetData_RobotMode)));
-
-#define FreeFleetData_RobotMode_free(d,o) \
-dds_sample_free ((d), &FreeFleetData_RobotMode_desc, (o))
 
 
 typedef struct FreeFleetData_DockMode
@@ -62,6 +48,20 @@ extern const dds_topic_descriptor_t FreeFleetData_DockMode_desc;
 
 #define FreeFleetData_DockMode_free(d,o) \
 dds_sample_free ((d), &FreeFleetData_DockMode_desc, (o))
+
+
+typedef struct FreeFleetData_RobotMode
+{
+  uint32_t mode;
+} FreeFleetData_RobotMode;
+
+extern const dds_topic_descriptor_t FreeFleetData_RobotMode_desc;
+
+#define FreeFleetData_RobotMode__alloc() \
+((FreeFleetData_RobotMode*) dds_alloc (sizeof (FreeFleetData_RobotMode)));
+
+#define FreeFleetData_RobotMode_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_RobotMode_desc, (o))
 
 
 typedef struct FreeFleetData_Location
@@ -133,6 +133,80 @@ extern const dds_topic_descriptor_t FreeFleetData_ModeParameter_desc;
 #define FreeFleetData_ModeParameter_free(d,o) \
 dds_sample_free ((d), &FreeFleetData_ModeParameter_desc, (o))
 
+
+typedef struct FreeFleetData_CancelRequest
+{
+  char * fleet_name;
+  char * robot_name;
+  char * task_id;
+} FreeFleetData_CancelRequest;
+
+extern const dds_topic_descriptor_t FreeFleetData_CancelRequest_desc;
+
+#define FreeFleetData_CancelRequest__alloc() \
+((FreeFleetData_CancelRequest*) dds_alloc (sizeof (FreeFleetData_CancelRequest)));
+
+#define FreeFleetData_CancelRequest_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_CancelRequest_desc, (o))
+
+
+typedef struct FreeFleetData_DestinationRequest
+{
+  char * fleet_name;
+  char * robot_name;
+  FreeFleetData_Location destination;
+  char * task_id;
+} FreeFleetData_DestinationRequest;
+
+extern const dds_topic_descriptor_t FreeFleetData_DestinationRequest_desc;
+
+#define FreeFleetData_DestinationRequest__alloc() \
+((FreeFleetData_DestinationRequest*) dds_alloc (sizeof (FreeFleetData_DestinationRequest)));
+
+#define FreeFleetData_DestinationRequest_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_DestinationRequest_desc, (o))
+
+
+typedef struct FreeFleetData_DockRequest
+{
+  char * fleet_name;
+  char * robot_name;
+  FreeFleetData_Location destination;
+  char * task_id;
+  FreeFleetData_DockMode dock_mode;
+  bool machine;
+  float distance_go_out;
+  bool custom_docking;
+  int16_t rotate_to_dock;
+  int16_t rotate_angle;
+  int16_t rotate_orientation;
+} FreeFleetData_DockRequest;
+
+extern const dds_topic_descriptor_t FreeFleetData_DockRequest_desc;
+
+#define FreeFleetData_DockRequest__alloc() \
+((FreeFleetData_DockRequest*) dds_alloc (sizeof (FreeFleetData_DockRequest)));
+
+#define FreeFleetData_DockRequest_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_DockRequest_desc, (o))
+
+
+typedef struct FreeFleetData_LocalizeRequest
+{
+  char * fleet_name;
+  char * robot_name;
+  FreeFleetData_Location destination;
+  char * task_id;
+} FreeFleetData_LocalizeRequest;
+
+extern const dds_topic_descriptor_t FreeFleetData_LocalizeRequest_desc;
+
+#define FreeFleetData_LocalizeRequest__alloc() \
+((FreeFleetData_LocalizeRequest*) dds_alloc (sizeof (FreeFleetData_LocalizeRequest)));
+
+#define FreeFleetData_LocalizeRequest_free(d,o) \
+dds_sample_free ((d), &FreeFleetData_LocalizeRequest_desc, (o))
+
 typedef struct FreeFleetData_ModeRequest_parameters_seq
 {
   uint32_t _maximum;
@@ -195,63 +269,6 @@ extern const dds_topic_descriptor_t FreeFleetData_PathRequest_desc;
 
 #define FreeFleetData_PathRequest_free(d,o) \
 dds_sample_free ((d), &FreeFleetData_PathRequest_desc, (o))
-
-
-typedef struct FreeFleetData_DestinationRequest
-{
-  char * fleet_name;
-  char * robot_name;
-  FreeFleetData_Location destination;
-  char * task_id;
-} FreeFleetData_DestinationRequest;
-
-extern const dds_topic_descriptor_t FreeFleetData_DestinationRequest_desc;
-
-#define FreeFleetData_DestinationRequest__alloc() \
-((FreeFleetData_DestinationRequest*) dds_alloc (sizeof (FreeFleetData_DestinationRequest)));
-
-#define FreeFleetData_DestinationRequest_free(d,o) \
-dds_sample_free ((d), &FreeFleetData_DestinationRequest_desc, (o))
-
-
-typedef struct FreeFleetData_DockRequest
-{
-  char * fleet_name;
-  char * robot_name;
-  FreeFleetData_Location destination;
-  char * task_id;
-  FreeFleetData_DockMode dock_mode;
-  bool machine;
-  float distance_go_out;
-  bool custom_docking;
-  int16_t rotate_to_dock;
-  int16_t rotate_angle;
-  int16_t rotate_orientation;
-} FreeFleetData_DockRequest;
-
-extern const dds_topic_descriptor_t FreeFleetData_DockRequest_desc;
-
-#define FreeFleetData_DockRequest__alloc() \
-((FreeFleetData_DockRequest*) dds_alloc (sizeof (FreeFleetData_DockRequest)));
-
-#define FreeFleetData_DockRequest_free(d,o) \
-dds_sample_free ((d), &FreeFleetData_DockRequest_desc, (o))
-
-
-typedef struct FreeFleetData_CancelRequest
-{
-  char * fleet_name;
-  char * robot_name;
-  char * task_id;
-} FreeFleetData_CancelRequest;
-
-extern const dds_topic_descriptor_t FreeFleetData_CancelRequest_desc;
-
-#define FreeFleetData_CancelRequest__alloc() \
-((FreeFleetData_CancelRequest*) dds_alloc (sizeof (FreeFleetData_CancelRequest)));
-
-#define FreeFleetData_CancelRequest_free(d,o) \
-dds_sample_free ((d), &FreeFleetData_CancelRequest_desc, (o))
 
 #ifdef __cplusplus
 }

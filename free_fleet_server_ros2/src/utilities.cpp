@@ -99,6 +99,16 @@ void to_ff_message(
   _out_msg.task_id = _in_msg.task_id;
 }
 
+void to_ff_message(
+    const rmf_fleet_msgs::msg::LocalizeRequest& _in_msg, 
+    messages::LocalizeRequest& _out_msg)
+{
+  _out_msg.fleet_name = _in_msg.fleet_name;
+  _out_msg.robot_name = _in_msg.robot_name;
+  to_ff_message(_in_msg.destination, _out_msg.destination);
+  _out_msg.task_id = _in_msg.task_id;
+}
+
 void to_ros_message(
     const messages::Location& _in_msg,
     rmf_fleet_msgs::msg::Location& _out_msg)

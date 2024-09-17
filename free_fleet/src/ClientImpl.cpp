@@ -108,4 +108,16 @@ bool Client::ClientImpl::read_cancel_request(
   return false;
 }
 
+bool Client::ClientImpl::read_localize_request(
+    messages::LocalizeRequest& _localize_request)
+{
+  auto localize_requests = fields.localize_request_sub->read();
+  if (!localize_requests.empty())
+  {
+    convert(*(localize_requests[0]), _localize_request);
+    return true;
+  }
+  return false;
+}
+
 } // namespace free_fleet

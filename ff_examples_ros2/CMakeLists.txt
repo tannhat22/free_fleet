@@ -16,11 +16,12 @@ if (ament_cmake_FOUND)
 
   install(
     PROGRAMS 
+    scripts/send_cancel_request.py
       scripts/send_destination_request.py
-      scripts/send_path_request.py
-      scripts/send_mode_request.py
       scripts/send_dock_request.py
-      scripts/send_cancel_request.py
+      scripts/send_localize_request.py
+      scripts/send_mode_request.py
+      scripts/send_path_request.py
     DESTINATION lib/${PROJECT_NAME}
   )
 

@@ -24,11 +24,12 @@
 #include <free_fleet/ServerConfig.hpp>
 
 #include <free_fleet/messages/RobotState.hpp>
-#include <free_fleet/messages/ModeRequest.hpp>
-#include <free_fleet/messages/PathRequest.hpp>
+#include <free_fleet/messages/CancelRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
-#include <free_fleet/messages/CancelRequest.hpp>
+#include <free_fleet/messages/LocalizeRequest.hpp>
+#include <free_fleet/messages/ModeRequest.hpp>
+#include <free_fleet/messages/PathRequest.hpp>
 
 namespace free_fleet {
 
@@ -56,23 +57,16 @@ public:
   ///   True if new robot states were received, false otherwise.
   bool read_robot_states(std::vector<messages::RobotState>& new_robot_states);
 
-  /// Attempts to send a new mode request to all the clients. Clients are in
-  /// charge to identify if requests are targetted towards them.
-  /// 
-  /// \param[in] mode_request
-  ///   New mode request to be sent out to the clients.
-  /// \return
-  ///   True if the mode request was successfully sent, false otherwise.
-  bool send_mode_request(const messages::ModeRequest& mode_request);
 
-  /// Attempts to send a new path request to all the clients. Clients are in
-  /// charge to identify if requests are targetted towards them.
+  /// Attempts to send a new cancel request to all the clients. Clients 
+  /// are in charge to identify if requests are targetted towards them.
   ///
-  /// \param[in] path_request
-  ///   New path request to be sent out to the clients.
+  /// \param[in] cancel_request
+  ///   New cancel request to be sent out to the clients.
   /// \return
-  ///   True if the path request was successfully sent, false otherwise.
-  bool send_path_request(const messages::PathRequest& path_request);
+  ///   True if the cancel request was successfully sent, false otherwise.
+  bool send_cancel_request(
+      const messages::CancelRequest& cancel_request);
 
   /// Attempts to send a new destination request to all the clients. Clients 
   /// are in charge to identify if requests are targetted towards them.
@@ -94,15 +88,33 @@ public:
   bool send_dock_request(
       const messages::DockRequest& dock_request);
 
-  /// Attempts to send a new cancel request to all the clients. Clients 
+  /// Attempts to send a new dock request to all the clients. Clients 
   /// are in charge to identify if requests are targetted towards them.
   ///
-  /// \param[in] cancel_request
-  ///   New cancel request to be sent out to the clients.
+  /// \param[in] localize_request
+  ///   New localize request to be sent out to the clients.
   /// \return
-  ///   True if the cancel request was successfully sent, false otherwise.
-  bool send_cancel_request(
-      const messages::CancelRequest& cancel_request);
+  ///   True if the localize request was successfully sent, false otherwise.
+  bool send_localize_request(
+      const messages::LocalizeRequest& localize_request);
+
+  /// Attempts to send a new mode request to all the clients. Clients are in
+  /// charge to identify if requests are targetted towards them.
+  /// 
+  /// \param[in] mode_request
+  ///   New mode request to be sent out to the clients.
+  /// \return
+  ///   True if the mode request was successfully sent, false otherwise.
+  bool send_mode_request(const messages::ModeRequest& mode_request);
+
+  /// Attempts to send a new path request to all the clients. Clients are in
+  /// charge to identify if requests are targetted towards them.
+  ///
+  /// \param[in] path_request
+  ///   New path request to be sent out to the clients.
+  /// \return
+  ///   True if the path request was successfully sent, false otherwise.
+  bool send_path_request(const messages::PathRequest& path_request);
 
   /// Destructor
   ~Server();

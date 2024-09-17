@@ -18,16 +18,17 @@
 #ifndef FREE_FLEET__SRC__MESSAGES__MESSAGE_UTILS_HPP
 #define FREE_FLEET__SRC__MESSAGES__MESSAGE_UTILS_HPP
 
-#include <free_fleet/messages/Location.hpp>
-#include <free_fleet/messages/RobotMode.hpp>
 #include <free_fleet/messages/DockMode.hpp>
-#include <free_fleet/messages/RobotState.hpp>
+#include <free_fleet/messages/Location.hpp>
 #include <free_fleet/messages/ModeParameter.hpp>
-#include <free_fleet/messages/ModeRequest.hpp>
-#include <free_fleet/messages/PathRequest.hpp>
+#include <free_fleet/messages/RobotMode.hpp>
+#include <free_fleet/messages/RobotState.hpp>
+#include <free_fleet/messages/CancelRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
-#include <free_fleet/messages/CancelRequest.hpp>
+#include <free_fleet/messages/LocalizeRequest.hpp>
+#include <free_fleet/messages/ModeRequest.hpp>
+#include <free_fleet/messages/PathRequest.hpp>
 
 
 #include "FleetMessages.h"
@@ -63,29 +64,21 @@ void convert(const PathRequest& _input, FreeFleetData_PathRequest& _output);
 
 void convert(const FreeFleetData_PathRequest& _input, PathRequest& _output);
 
-void convert(
-    const DestinationRequest& _input, 
-    FreeFleetData_DestinationRequest& _output);
+void convert(const DestinationRequest& _input, FreeFleetData_DestinationRequest& _output);
 
-void convert(
-    const FreeFleetData_DestinationRequest& _input,
-    DestinationRequest& _output);
+void convert(const FreeFleetData_DestinationRequest& _input, DestinationRequest& _output);
 
-void convert(
-    const DockRequest& _input, 
-    FreeFleetData_DockRequest& _output);
+void convert(const DockRequest& _input, FreeFleetData_DockRequest& _output);
 
-void convert(
-    const FreeFleetData_DockRequest& _input,
-    DockRequest& _output);
+void convert(const FreeFleetData_DockRequest& _input, DockRequest& _output);
 
-void convert(
-    const CancelRequest& _input, 
-    FreeFleetData_CancelRequest& _output);
+void convert(const CancelRequest& _input, FreeFleetData_CancelRequest& _output);
 
-void convert(
-    const FreeFleetData_CancelRequest& _input,
-    CancelRequest& _output);
+void convert(const FreeFleetData_CancelRequest& _input, CancelRequest& _output);
+
+void convert(const LocalizeRequest& _input, FreeFleetData_LocalizeRequest& _output);
+
+void convert(const FreeFleetData_LocalizeRequest& _input, LocalizeRequest& _output);
 
 } // namespace 
 } // namespace free_fleet

@@ -27,6 +27,7 @@
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
 #include <free_fleet/messages/CancelRequest.hpp>
+#include <free_fleet/messages/LocalizeRequest.hpp>
 
 #include "utilities.hpp"
 #include "ServerNode.hpp"
@@ -106,6 +107,7 @@ void ServerNode::setup_config()
   get_parameter("destination_request_topic", server_node_config.destination_request_topic);
   get_parameter("dock_request_topic", server_node_config.dock_request_topic);
   get_parameter("cancel_request_topic", server_node_config.cancel_request_topic);
+  get_parameter("localize_request_topic", server_node_config.localize_request_topic);
   get_parameter("dds_domain", server_node_config.dds_domain);
   get_parameter("dds_robot_state_topic", server_node_config.dds_robot_state_topic);
   get_parameter("dds_mode_request_topic", server_node_config.dds_mode_request_topic);
@@ -113,12 +115,13 @@ void ServerNode::setup_config()
   get_parameter("dds_destination_request_topic", server_node_config.dds_destination_request_topic);
   get_parameter("dds_dock_request_topic", server_node_config.dds_dock_request_topic);
   get_parameter("dds_cancel_request_topic", server_node_config.dds_cancel_request_topic);
+  get_parameter("dds_localize_request_topic", server_node_config.dds_localize_request_topic);
   get_parameter("update_state_frequency", server_node_config.update_state_frequency);
   get_parameter("publish_state_frequency", server_node_config.publish_state_frequency);
-  get_parameter("translation_x", server_node_config.translation_x);
-  get_parameter("translation_y", server_node_config.translation_y);
-  get_parameter("rotation", server_node_config.rotation);
-  get_parameter("scale", server_node_config.scale);
+  get_parameter("translation_x", server_node_config.L_translation_x);
+  get_parameter("translation_y", server_node_config.L_translation_y);
+  get_parameter("rotation", server_node_config.L_rotation);
+  get_parameter("scale", server_node_config.L_scale);
 }
 
 bool ServerNode::is_ready()
@@ -182,7 +185,7 @@ void ServerNode::start(Fields _fields)
       mode_request_sub_opt);
 
   // --------------------------------------------------------------------------
-  // Path reqeust handling
+  // Path request handling
 
   auto path_request_sub_opt = rclcpp::SubscriptionOptions();
 
@@ -197,7 +200,7 @@ void ServerNode::start(Fields _fields)
       path_request_sub_opt);
 
   // --------------------------------------------------------------------------
-  // Destination reqeust handling
+  // Destination request handling
 
   auto destination_request_sub_opt = rclcpp::SubscriptionOptions();
 
@@ -213,7 +216,7 @@ void ServerNode::start(Fields _fields)
           destination_request_sub_opt);
 
   // --------------------------------------------------------------------------
-  // Dock reqeust handling
+  // Dock request handling
 
   auto dock_request_sub_opt = rclcpp::SubscriptionOptions();
 
@@ -229,7 +232,7 @@ void ServerNode::start(Fields _fields)
           dock_request_sub_opt);
 
   // --------------------------------------------------------------------------
-  // Cancel reqeust handling
+  // Cancel request handling
 
   auto cancel_request_sub_opt = rclcpp::SubscriptionOptions();
 
@@ -243,7 +246,24 @@ void ServerNode::start(Fields _fields)
             handle_cancel_request(std::move(msg));
           },
           cancel_request_sub_opt);
+  // --------------------------------------------------------------------------
+  // Localize request handling
+
+  auto localize_request_sub_opt = rclcpp::SubscriptionOptions();
+
+  localize_request_sub_opt.callback_group = fleet_state_pub_callback_group;
+
+  localize_request_sub =
+      create_subscription<rmf_fleet_msgs::msg::LocalizeRequest>(
+          server_node_config.localize_request_topic, rclcpp::QoS(10),
+          [&](rmf_fleet_msgs::msg::LocalizeRequest::UniquePtr msg)
+          {
+            handle_localize_request(std::move(msg));
+          },
+          localize_request_sub_opt);
+  // --------------------------------------------------------------------------
 }
+
 
 bool ServerNode::is_request_valid(
     const std::string& _fleet_name, const std::string& _robot_name)
@@ -262,25 +282,49 @@ void ServerNode::transform_fleet_to_rmf(
     const rmf_fleet_msgs::msg::Location& _fleet_frame_location,
     rmf_fleet_msgs::msg::Location& _rmf_frame_location) const
 {
+
+  double scale;
+  double rotation;
+  double translation_x;
+  double translation_y;
+
+  int index = -1;
+  if (_fleet_frame_location.level_name == "L1") {
+      index = 0;
+  } else if (_fleet_frame_location.level_name == "L2") {
+      index = 1;
+  } else if (_fleet_frame_location.level_name == "L3") {
+      index = 2;
+  } else {
+      RCLCPP_ERROR(get_logger(),"Level name is not supported, please check!");
+  }
+
+  if (index != -1) {
+      scale = server_node_config.L_scale[index];
+      rotation = server_node_config.L_rotation[index];
+      translation_x = server_node_config.L_translation_x[index];
+      translation_y = server_node_config.L_translation_y[index];
+  }
+
   // It feels easier to read if each operation is a separate statement.
   // The compiler will be super smart and elide all these operations.
   const Eigen::Vector2d translated =
       Eigen::Vector2d(_fleet_frame_location.x, _fleet_frame_location.y)
       - Eigen::Vector2d(
-          server_node_config.translation_x, server_node_config.translation_y);
+          translation_x, translation_y);
 
   // RCLCPP_INFO(
   //     get_logger(), "    fleet->rmf translated: (%.3f, %.3f)",
   //     translated[0], translated[1]);
 
   const Eigen::Vector2d rotated =
-      Eigen::Rotation2D<double>(-server_node_config.rotation) * translated;
+      Eigen::Rotation2D<double>(-rotation) * translated;
 
   // RCLCPP_INFO(
   //     get_logger(), "    fleet->rmf rotated: (%.3f, %.3f)",
   //     rotated[0], rotated[1]);
 
-  const Eigen::Vector2d scaled = 1.0 / server_node_config.scale * rotated;
+  const Eigen::Vector2d scaled = 1.0 / scale * rotated;
 
   // RCLCPP_INFO(
   //     get_logger(), "    fleet->rmf scaled: (%.3f, %.3f)",
@@ -289,7 +333,7 @@ void ServerNode::transform_fleet_to_rmf(
   _rmf_frame_location.x = scaled[0];
   _rmf_frame_location.y = scaled[1];
   _rmf_frame_location.yaw =
-      _fleet_frame_location.yaw - server_node_config.rotation;
+      _fleet_frame_location.yaw - rotation;
 
   _rmf_frame_location.t = _fleet_frame_location.t;
   _rmf_frame_location.level_name = _fleet_frame_location.level_name;
@@ -299,10 +343,33 @@ void ServerNode::transform_rmf_to_fleet(
     const rmf_fleet_msgs::msg::Location& _rmf_frame_location,
     rmf_fleet_msgs::msg::Location& _fleet_frame_location) const
 {
+  double scale;
+  double rotation;
+  double translation_x;
+  double translation_y;
+
+  int index = -1;
+  if (_rmf_frame_location.level_name == "L1") {
+      index = 0;
+  } else if (_rmf_frame_location.level_name == "L2") {
+      index = 1;
+  } else if (_rmf_frame_location.level_name == "L3") {
+      index = 2;
+  } else {
+      RCLCPP_ERROR(get_logger(),"Level name is not supported, please check!");
+  }
+
+  if (index != -1) {
+      scale = server_node_config.L_scale[index];
+      rotation = server_node_config.L_rotation[index];
+      translation_x = server_node_config.L_translation_x[index];
+      translation_y = server_node_config.L_translation_y[index];
+  }
+
   // It feels easier to read if each operation is a separate statement.
   // The compiler will be super smart and elide all these operations.
   const Eigen::Vector2d scaled =
-      server_node_config.scale *
+      scale *
       Eigen::Vector2d(_rmf_frame_location.x, _rmf_frame_location.y);
 
   // RCLCPP_INFO(
@@ -310,7 +377,7 @@ void ServerNode::transform_rmf_to_fleet(
   //     scaled[0], scaled[1]);
 
   const Eigen::Vector2d rotated =
-      Eigen::Rotation2D<double>(server_node_config.rotation) * scaled;
+      Eigen::Rotation2D<double>(rotation) * scaled;
 
   // RCLCPP_INFO(
   //     get_logger(), "    rmf->fleet rotated: (%.3f, %.3f)",
@@ -319,7 +386,7 @@ void ServerNode::transform_rmf_to_fleet(
   const Eigen::Vector2d translated =
       rotated +
       Eigen::Vector2d(
-          server_node_config.translation_x, server_node_config.translation_y);
+          translation_x, translation_y);
 
   // RCLCPP_INFO(
   //     get_logger(), "    rmf->fleet translated: (%.3f, %.3f)",
@@ -328,7 +395,7 @@ void ServerNode::transform_rmf_to_fleet(
   _fleet_frame_location.x = translated[0];
   _fleet_frame_location.y = translated[1];
   _fleet_frame_location.yaw =
-      _rmf_frame_location.yaw + server_node_config.rotation;
+      _rmf_frame_location.yaw + rotation;
 
   _fleet_frame_location.obey_approach_speed_limit = _rmf_frame_location.obey_approach_speed_limit;
   _fleet_frame_location.approach_speed_limit = _rmf_frame_location.approach_speed_limit;
@@ -389,6 +456,18 @@ void ServerNode::handle_cancel_request(
   messages::CancelRequest ff_msg;
   to_ff_message(*(_msg.get()), ff_msg);
   fields.server->send_cancel_request(ff_msg);
+}
+
+void ServerNode::handle_localize_request(
+    rmf_fleet_msgs::msg::LocalizeRequest::UniquePtr _msg)
+{
+  // rmf_fleet_msgs::msg::Location fleet_frame_destination;
+  // transform_rmf_to_fleet(_msg->destination, fleet_frame_destination);
+  // _msg->destination = fleet_frame_destination;
+
+  messages::LocalizeRequest ff_msg;
+  to_ff_message(*(_msg.get()), ff_msg);
+  fields.server->send_localize_request(ff_msg);
 }
 
 void ServerNode::update_state_callback()

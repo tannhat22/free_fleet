@@ -22,12 +22,13 @@
 
 #include <free_fleet/ClientConfig.hpp>
 
-#include <free_fleet/messages/RobotState.hpp>
-#include <free_fleet/messages/ModeRequest.hpp>
-#include <free_fleet/messages/PathRequest.hpp>
+#include <free_fleet/messages/CancelRequest.hpp>
 #include <free_fleet/messages/DestinationRequest.hpp>
 #include <free_fleet/messages/DockRequest.hpp>
-#include <free_fleet/messages/CancelRequest.hpp>
+#include <free_fleet/messages/LocalizeRequest.hpp>
+#include <free_fleet/messages/ModeRequest.hpp>
+#include <free_fleet/messages/PathRequest.hpp>
+#include <free_fleet/messages/RobotState.hpp>
 
 namespace free_fleet {
 
@@ -55,25 +56,16 @@ public:
   ///   True if robot state was successfully sent, false otherwise.
   bool send_robot_state(const messages::RobotState& new_robot_state);
 
-  /// Attempts to read and receive a new mode request from the free fleet
-  /// server, for commanding the robot client.
-  ///
-  /// \param[out] mode_request
-  ///   Newly received robot mode request from the free fleet server, to be
-  ///   handled by the robot client.
+  /// Attempts to read and receive a new cancel request from the free
+  /// fleet server, for commanding the robot client.
+  /// 
+  /// \param[out] cancel_request
+  ///   Newly received robot cancel request from the free fleet server,
+  ///   to be handled by the robot client.
   /// \return
-  ///   True if a new mode request was received, false otherwise.
-  bool read_mode_request(messages::ModeRequest& mode_request);
-
-  /// Attempts to read and receive a new path request from the free fleet
-  /// server, for commanding the robot client.
-  ///
-  /// \param[out] path_request
-  ///   Newly received robot path request from the free fleet server, to be
-  ///   handled by the robot client.
-  /// \return
-  ///   True if a new path request was received, false otherwise.
-  bool read_path_request(messages::PathRequest& path_request);
+  ///   True if a new cancel request was received, false otherwise.
+  bool read_cancel_request(
+      messages::CancelRequest& cancel_request);
 
   /// Attempts to read and receive a new destination request from the free
   /// fleet server, for commanding the robot client.
@@ -97,16 +89,36 @@ public:
   bool read_dock_request(
       messages::DockRequest& dock_request);
 
-  /// Attempts to read and receive a new cancel request from the free
+  /// Attempts to read and receive a new localize request from the free
   /// fleet server, for commanding the robot client.
   /// 
-  /// \param[out] cancel_request
-  ///   Newly received robot cancel request from the free fleet server,
+  /// \param[out] localize_request
+  ///   Newly received robot localize request from the free fleet server,
   ///   to be handled by the robot client.
   /// \return
-  ///   True if a new cancel request was received, false otherwise.
-  bool read_cancel_request(
-      messages::CancelRequest& cancel_request);
+  ///   True if a new localize request was received, false otherwise.
+  bool read_localize_request(
+      messages::LocalizeRequest& localize_request);
+
+  /// Attempts to read and receive a new mode request from the free fleet
+  /// server, for commanding the robot client.
+  ///
+  /// \param[out] mode_request
+  ///   Newly received robot mode request from the free fleet server, to be
+  ///   handled by the robot client.
+  /// \return
+  ///   True if a new mode request was received, false otherwise.
+  bool read_mode_request(messages::ModeRequest& mode_request);
+
+  /// Attempts to read and receive a new path request from the free fleet
+  /// server, for commanding the robot client.
+  ///
+  /// \param[out] path_request
+  ///   Newly received robot path request from the free fleet server, to be
+  ///   handled by the robot client.
+  /// \return
+  ///   True if a new path request was received, false otherwise.
+  bool read_path_request(messages::PathRequest& path_request);
 
   /// Destructor
   ~Client();
