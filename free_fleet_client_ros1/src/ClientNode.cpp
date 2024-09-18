@@ -66,6 +66,23 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
       _config.autodock_server_name.c_str());
   /////////////////////////////////////////////////////////////
 
+  /// Setting up the change_floor server client, if required, wait for server
+  std::unique_ptr<ros::ServiceClient> change_floor_client = nullptr;
+  if (_config.localize_server_name != "")
+  {
+    change_floor_client =
+      std::make_unique<ros::ServiceClient>(
+        client_node->node->serviceClient<amr_v3_msgs::ChangeFloor>(
+          _config.localize_server_name, true));
+    if (!change_floor_client->waitForExistence(
+      ros::Duration(_config.wait_timeout)))
+    {
+      ROS_ERROR("timed out waiting for change_floor server: %s",
+        _config.localize_server_name.c_str());
+      return nullptr;
+    }
+  }
+
   /// Wait for set initial pose
   if (_config.wait_for_intialpose) {
     ROS_INFO("waiting for set initial pose!");
@@ -86,6 +103,7 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
       std::move(client),
       std::move(follow_waypoints_client),
       std::move(autodock_client),
+      std::move(change_floor_client),
   });
 
   return client_node;
@@ -766,9 +784,50 @@ bool ClientNode::read_cancel_request()
   return false;
 }
 
+bool ClientNode::read_localize_request()
+{
+  messages::LocalizeRequest localize_request;
+  if (fields.client->read_localize_request(localize_request) &&
+      is_valid_request(
+          localize_request.fleet_name, localize_request.robot_name,
+          localize_request.task_id))
+  {
+    ROS_INFO("received a ChangeFloor command.");
+    // WriteLock dock_goal_lock(dock_goal_mutex);
+    if (fields.change_floor_client &&
+        fields.change_floor_client->isValid()) {
+      amr_v3_msgs::ChangeFloor changeFloor_srv;
+      changeFloor_srv.request.floor_name = localize_request.destination.level_name;
+      changeFloor_srv.request.initial_pose.position.x = localize_request.destination.x;
+      changeFloor_srv.request.initial_pose.position.y = localize_request.destination.y;
+      changeFloor_srv.request.initial_pose.orientation = get_quat_from_yaw(localize_request.destination.yaw);
+
+      fields.change_floor_client->call(changeFloor_srv);
+      if (!changeFloor_srv.response.success) {
+        ROS_ERROR("Failed to change floor, please check!");
+        request_error = true;
+        error_mode_handle(amr_v3_msgs::Error::LOCALIZATION_ERROR, LOCALIZATION_ERROR, false);
+        return false;
+      } else {
+        WriteLock robot_transform_lock(robot_transform_mutex);
+        client_node_config.level_name = localize_request.destination.level_name;
+      }
+
+    }
+
+    WriteLock task_id_lock(task_id_mutex);
+    current_task_id = localize_request.task_id;
+
+    // request_error = false;
+    return true;
+  }
+  return false;
+}
+
 void ClientNode::read_requests()
 {
   if (read_cancel_request() ||
+      read_localize_request() ||
       read_mode_request() || 
       read_path_request() || 
       read_destination_request() || 

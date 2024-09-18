@@ -102,6 +102,7 @@ void ClientNodeConfig::print_config() const
   printf("    is_intialpose: %s\n", is_intialpose_topic.c_str());
   printf("    follow waypoints server: %s\n", follow_waypoints_server_name.c_str());
   printf("    autodock server: %s\n", autodock_server_name.c_str());
+  printf("    localize server: %s\n", localize_server_name.c_str());
   printf("  ROBOT FRAMES\n");
   printf("    map frame: %s\n", map_frame.c_str());
   printf("    robot frame: %s\n", robot_frame.c_str());
@@ -114,6 +115,7 @@ void ClientNodeConfig::print_config() const
   printf("    destination request: %s\n", dds_destination_request_topic.c_str());
   printf("    dock request: %s\n", dds_dock_request_topic.c_str());
   printf("    cancel request: %s\n", dds_cancel_request_topic.c_str());
+  printf("    localize request: %s\n", dds_localize_request_topic.c_str());
 }
   
 ClientConfig ClientNodeConfig::get_client_config() const
@@ -126,6 +128,7 @@ ClientConfig ClientNodeConfig::get_client_config() const
   client_config.dds_destination_request_topic = dds_destination_request_topic;
   client_config.dds_dock_request_topic = dds_dock_request_topic;
   client_config.dds_cancel_request_topic = dds_cancel_request_topic;
+  client_config.dds_localize_request_topic = dds_localize_request_topic;
   return client_config;
 }
 
@@ -168,20 +171,21 @@ ClientNodeConfig ClientNodeConfig::make()
   config.get_param_if_available(
       node_private_ns, "autodock_server_name", config.autodock_server_name);
   config.get_param_if_available(
+      node_private_ns, "localize_server_name", config.localize_server_name);
+  config.get_param_if_available(
       node_private_ns, "dds_domain", config.dds_domain);
   config.get_param_if_available(
       node_private_ns, "dds_mode_request_topic", config.dds_mode_request_topic);
   config.get_param_if_available(
       node_private_ns, "dds_path_request_topic", config.dds_path_request_topic);
   config.get_param_if_available(
-      node_private_ns, "dds_destination_request_topic", 
-      config.dds_destination_request_topic);
+      node_private_ns, "dds_destination_request_topic", config.dds_destination_request_topic);
   config.get_param_if_available(
-      node_private_ns, "dds_dock_request_topic", 
-      config.dds_dock_request_topic);
+      node_private_ns, "dds_dock_request_topic", config.dds_dock_request_topic);
   config.get_param_if_available(
-      node_private_ns, "dds_cancel_request_topic", 
-      config.dds_cancel_request_topic);
+      node_private_ns, "dds_cancel_request_topic", config.dds_cancel_request_topic);
+  config.get_param_if_available(
+      node_private_ns, "dds_localize_request_topic", config.dds_localize_request_topic);
   config.get_param_if_available(
       node_private_ns, "wait_for_intialpose", config.wait_for_intialpose);
   config.get_param_if_available(

@@ -53,6 +53,7 @@ struct ClientNodeConfig
 
   std::string follow_waypoints_server_name = "follow_waypoints_server";
   std::string autodock_server_name = "autodock";
+  std::string localize_server_name = "localize_server";
 
   int dds_domain = 42;
   std::string dds_state_topic = "robot_state";
@@ -61,6 +62,7 @@ struct ClientNodeConfig
   std::string dds_destination_request_topic = "destination_request";
   std::string dds_dock_request_topic = "dock_request";
   std::string dds_cancel_request_topic = "cancel_request";
+  std::string dds_localize_request_topic = "localize_request";
 
   bool wait_for_intialpose = false;
   double wait_timeout = 10.0;

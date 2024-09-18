@@ -34,6 +34,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <amr_v3_msgs/LightMode.h>
 #include <amr_v3_msgs/ErrorStamped.h>
+#include <amr_v3_msgs/ChangeFloor.h>
 
 #include <amr_v3_autodocking/AutoDockingGoal.h>
 #include <amr_v3_autodocking/AutoDockingAction.h>
@@ -86,6 +87,9 @@ public:
 
     /// autodock action client
     AutoDockClientSharedPtr autodock_client;
+
+    /// changeFloor server client
+    std::unique_ptr<ros::ServiceClient> change_floor_client;
   };
 
   void print_config();
@@ -169,6 +173,7 @@ private:
   std::string DOCK_PICKUP_ERROR = "AMR_ERROR: DOCK_PICKUP_ERROR!";
   std::string DOCK_DROPOFF_ERROR = "AMR_ERROR: DOCK_DROPOFF_ERROR!";
   std::string UNDOCK_ERROR = "AMR_ERROR: UNDOCK_ERROR!";
+  std::string LOCALIZATION_ERROR = "AMR_ERROR: LOCALIZATION_ERROR!";
 
 
 
@@ -195,6 +200,11 @@ private:
   // Cancel request handling
 
   bool read_cancel_request();
+
+  // --------------------------------------------------------------------------
+  // Localize request handling
+
+  bool read_localize_request();
 
   // --------------------------------------------------------------------------
   // Task handling
