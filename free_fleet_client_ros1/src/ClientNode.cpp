@@ -94,6 +94,9 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
     if (sharedEdge == NULL) {
       ROS_ERROR("timed out waiting for set initial pose");
       return nullptr;
+    } else if (!sharedEdge->data) {
+      ROS_ERROR("Set initial pose is Error!");
+      return nullptr;
     }
     ROS_INFO("Initial pose is set success will run fleet!");
   }
