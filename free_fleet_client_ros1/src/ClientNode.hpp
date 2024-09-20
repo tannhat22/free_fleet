@@ -120,11 +120,13 @@ private:
   ros::Subscriber hand_control_sub;
   ros::Subscriber cmd_pause_amr_sub;
   ros::Subscriber cmd_reset_amr_sub;
+  ros::Subscriber floor_name_sub;
 
   void emergency_stop_callback(const std_msgs::Bool& msg);
   void hand_control_callback(const std_msgs::Bool& msg);
   void cmd_pause_amr_callback(const std_msgs::Bool& msg);
   void cmd_reset_error_amr_callback(const std_msgs::Empty& msg);
+  void floor_name_callback(const std_msgs::String& msg);
   // --------------------------------------------------------------------------
   // Battery handling
 
@@ -162,7 +164,7 @@ private:
   std::atomic<bool> hand_control;
   std::atomic<bool> paused;
   std::atomic<bool> docking;
-  std::atomic<bool> is_charging;
+  // std::atomic<bool> is_charging;
   std::atomic<bool> is_in_charger;
   std::atomic<bool> state_runonce;
   // std::atomic<bool> state_brake;
@@ -294,7 +296,7 @@ private:
 
   void light_status_publish(uint8_t mode);
 
-  void undock_charger_before_process();
+  // void undock_charger_before_process();
 
   // void cmd_cancel(bool cancel);
 

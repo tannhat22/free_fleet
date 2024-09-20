@@ -7,7 +7,6 @@ module FreeFleetData
     const unsigned long MODE_PICKUP = 2;
     const unsigned long MODE_DROPOFF = 3;
     const unsigned long MODE_UNDOCK = 4;
-    const unsigned long MODE_GOOUT = 5;
   };
   module RobotMode_Constants
   {

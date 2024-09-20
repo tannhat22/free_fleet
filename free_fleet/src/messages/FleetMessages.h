@@ -22,7 +22,6 @@ extern "C" {
 #define FreeFleetData_DockMode_Constants_MODE_PICKUP 2
 #define FreeFleetData_DockMode_Constants_MODE_DROPOFF 3
 #define FreeFleetData_DockMode_Constants_MODE_UNDOCK 4
-#define FreeFleetData_DockMode_Constants_MODE_GOOUT 5
 #define FreeFleetData_RobotMode_Constants_MODE_IDLE 0
 #define FreeFleetData_RobotMode_Constants_MODE_CHARGING 1
 #define FreeFleetData_RobotMode_Constants_MODE_MOVING 2
