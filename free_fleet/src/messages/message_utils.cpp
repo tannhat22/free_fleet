@@ -217,7 +217,6 @@ void convert(
   convert(_input.destination, _output.destination);
   _output.task_id = common::dds_string_alloc_and_copy(_input.task_id);
   convert(_input.dock_mode, _output.dock_mode);
-  _output.machine = _input.machine;
   _output.distance_go_out = _input.distance_go_out;
   _output.custom_docking = _input.custom_docking;
   _output.rotate_to_dock = _input.rotate_to_dock;
@@ -234,7 +233,6 @@ void convert(
   convert(_input.destination, _output.destination);
   _output.task_id = std::string(_input.task_id);
   convert(_input.dock_mode, _output.dock_mode);
-  _output.machine = _input.machine;
   _output.distance_go_out = _input.distance_go_out;
   _output.custom_docking = _input.custom_docking;
   _output.rotate_to_dock = _input.rotate_to_dock;

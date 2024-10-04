@@ -206,7 +206,6 @@ static const uint32_t FreeFleetData_DockRequest_ops [] =
   DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, destination.level_name),
   DDS_OP_ADR | DDS_OP_TYPE_STR, offsetof (FreeFleetData_DockRequest, task_id),
   DDS_OP_ADR | DDS_OP_TYPE_4BY, offsetof (FreeFleetData_DockRequest, dock_mode.mode),
-  DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_DockRequest, machine),
   DDS_OP_ADR | DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP, offsetof (FreeFleetData_DockRequest, distance_go_out),
   DDS_OP_ADR | DDS_OP_TYPE_BLN, offsetof (FreeFleetData_DockRequest, custom_docking),
   DDS_OP_ADR | DDS_OP_TYPE_2BY | DDS_OP_FLAG_SGN, offsetof (FreeFleetData_DockRequest, rotate_to_dock),
@@ -223,9 +222,9 @@ const dds_topic_descriptor_t FreeFleetData_DockRequest_desc =
   0u,
   "FreeFleetData::DockRequest",
   NULL,
-  19,
+  18,
   FreeFleetData_DockRequest_ops,
-  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"DockMode\"><Member name=\"mode\"><ULong/></Member></Struct><Struct name=\"DockRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"dock_mode\"><Type name=\"DockMode\"/></Member><Member name=\"machine\"><Boolean/></Member><Member name=\"distance_go_out\"><Float/></Member><Member name=\"custom_docking\"><Boolean/></Member><Member name=\"rotate_to_dock\"><Short/></Member><Member name=\"rotate_angle\"><Short/></Member><Member name=\"rotate_orientation\"><Short/></Member></Struct></Module></MetaData>"
+  "<MetaData version=\"1.0.0\"><Module name=\"FreeFleetData\"><Struct name=\"Location\"><Member name=\"sec\"><Long/></Member><Member name=\"nanosec\"><ULong/></Member><Member name=\"x\"><Float/></Member><Member name=\"y\"><Float/></Member><Member name=\"yaw\"><Float/></Member><Member name=\"obey_approach_speed_limit\"><Boolean/></Member><Member name=\"approach_speed_limit\"><Float/></Member><Member name=\"level_name\"><String/></Member></Struct><Struct name=\"DockMode\"><Member name=\"mode\"><ULong/></Member></Struct><Struct name=\"DockRequest\"><Member name=\"fleet_name\"><String/></Member><Member name=\"robot_name\"><String/></Member><Member name=\"destination\"><Type name=\"Location\"/></Member><Member name=\"task_id\"><String/></Member><Member name=\"dock_mode\"><Type name=\"DockMode\"/></Member><Member name=\"distance_go_out\"><Float/></Member><Member name=\"custom_docking\"><Boolean/></Member><Member name=\"rotate_to_dock\"><Short/></Member><Member name=\"rotate_angle\"><Short/></Member><Member name=\"rotate_orientation\"><Short/></Member></Struct></Module></MetaData>"
 };
 
 

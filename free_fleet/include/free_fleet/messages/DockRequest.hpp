@@ -31,7 +31,6 @@ struct DockRequest
   Location destination;
   std::string task_id;
   DockMode dock_mode;
-  bool machine;
   float distance_go_out;
   bool custom_docking;
   int16_t rotate_to_dock;

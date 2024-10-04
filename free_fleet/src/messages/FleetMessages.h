@@ -173,7 +173,6 @@ typedef struct FreeFleetData_DockRequest
   FreeFleetData_Location destination;
   char * task_id;
   FreeFleetData_DockMode dock_mode;
-  bool machine;
   float distance_go_out;
   bool custom_docking;
   int16_t rotate_to_dock;

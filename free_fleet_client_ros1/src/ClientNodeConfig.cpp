@@ -99,7 +99,7 @@ void ClientNodeConfig::print_config() const
   printf("    mode_error: %s\n", mode_error_topic.c_str());
   printf("    emergency stop: %s\n", emergency_stop_topic.c_str());
   printf("    battery state: %s\n", battery_state_topic.c_str());
-  printf("    is_intialpose: %s\n", is_intialpose_topic.c_str());
+  printf("    floor_name: %s\n", floor_name_topic.c_str());
   printf("    follow waypoints server: %s\n", follow_waypoints_server_name.c_str());
   printf("    autodock server: %s\n", autodock_server_name.c_str());
   printf("    localize server: %s\n", localize_server_name.c_str());
@@ -161,7 +161,7 @@ ClientNodeConfig ClientNodeConfig::make()
   config.get_param_if_available(
       node_private_ns, "battery_state_topic", config.battery_state_topic);
   config.get_param_if_available(
-      node_private_ns, "is_intialpose_topic", config.is_intialpose_topic);
+      node_private_ns, "floor_name_topic", config.floor_name_topic);
   config.get_param_if_available(
       node_private_ns, "map_frame", config.map_frame);
   config.get_param_if_available(

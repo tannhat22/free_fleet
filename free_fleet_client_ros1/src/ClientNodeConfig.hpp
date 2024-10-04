@@ -44,7 +44,7 @@ struct ClientNodeConfig
   std::string cmd_breaker_topic = "cmd_brake";
   std::string mode_error_topic = "error_mode";
   std::string emergency_stop_topic = "emergency_stop";
-  std::string is_intialpose_topic = "is_intialpose";
+  std::string floor_name_topic = "floor_name";
 
   std::string battery_state_topic = "/battery_state";
 

@@ -79,6 +79,7 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
     {
       ROS_ERROR("timed out waiting for change_floor server: %s",
         _config.localize_server_name.c_str());
+
       return nullptr;
     }
   }
@@ -86,17 +87,17 @@ ClientNode::SharedPtr ClientNode::make(const ClientNodeConfig& _config)
   /// Wait for set initial pose
   if (_config.wait_for_intialpose) {
     ROS_INFO("waiting for set initial pose!");
-    ros::NodeHandle get_setpos;
-    boost::shared_ptr<std_msgs::Bool const> sharedEdge;
-    sharedEdge = ros::topic::waitForMessage<std_msgs::Bool>(_config.is_intialpose_topic, get_setpos, 
+    ros::NodeHandle get_floorname;
+    boost::shared_ptr<std_msgs::String const> sharedEdge;
+    sharedEdge = ros::topic::waitForMessage<std_msgs::String>(_config.floor_name_topic, get_floorname, 
                                                             ros::Duration(_config.wait_timeout_intialpose));
 
     if (sharedEdge == NULL) {
-      ROS_ERROR("timed out waiting for set initial pose");
+      ROS_ERROR("timed out waiting for set initial_pose and get floor_name");
       return nullptr;
-    } else if (!sharedEdge->data) {
-      ROS_ERROR("Set initial pose is Error!");
-      return nullptr;
+    } else {
+      ROS_INFO("Get initial floor_name: %s", sharedEdge->data.c_str());
+      client_node->client_node_config.level_name = sharedEdge->data;
     }
     ROS_INFO("Initial pose is set success will run fleet!");
   }
@@ -194,7 +195,7 @@ void ClientNode::start(Fields _fields)
 
   // Floor name sub
   floor_name_sub = node->subscribe(
-      "/amr/floor_name", 1,
+      client_node_config.floor_name_topic, 1,
       &ClientNode::floor_name_callback, this);
 
   ROS_INFO("Client: starting update thread.");
@@ -494,8 +495,7 @@ follow_waypoints::FollowWaypointsGoal ClientNode::location_to_follow_waypoints_g
 
 amr_v3_autodocking::AutoDockingGoal ClientNode::location_to_autodock_goal(
       const messages::Location& _location, const messages::DockMode& _mode,
-      const bool _machine, const float _distance_go_out,
-      const bool _custom_docking, const int16_t _rotate_to_dock,
+      const float _distance_go_out, const bool _custom_docking, const int16_t _rotate_to_dock,
       const int16_t _rotate_angle, const int16_t _rotate_direction ) const
 {
   amr_v3_autodocking::AutoDockingGoal goal;
@@ -507,7 +507,6 @@ amr_v3_autodocking::AutoDockingGoal ClientNode::location_to_autodock_goal(
   goal.dock_pose.pose.position.z = 0.0;
   goal.dock_pose.pose.orientation = get_quat_from_yaw(_location.yaw);
   goal.mode = _mode.mode;
-  goal.machine = _machine;
   goal.distance_go_out = _distance_go_out;
   goal.custom_docking = _custom_docking;
   goal.rotate_to_dock = _rotate_to_dock;
@@ -730,7 +729,6 @@ bool ClientNode::read_dock_request()
     WriteLock dock_goal_lock(dock_goal_mutex);
     dock_goal.autodock_goal = location_to_autodock_goal(dock_request.destination,
                                                         dock_request.dock_mode,
-                                                        dock_request.machine,
                                                         dock_request.distance_go_out,
                                                         dock_request.custom_docking,
                                                         dock_request.rotate_to_dock,

@@ -76,7 +76,6 @@ module FreeFleetData
     Location destination;
     string task_id;
     DockMode dock_mode;
-    boolean machine;
     float distance_go_out;
     boolean custom_docking;
     short rotate_to_dock;

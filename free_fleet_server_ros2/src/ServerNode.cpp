@@ -461,9 +461,9 @@ void ServerNode::handle_cancel_request(
 void ServerNode::handle_localize_request(
     rmf_fleet_msgs::msg::LocalizeRequest::UniquePtr _msg)
 {
-  // rmf_fleet_msgs::msg::Location fleet_frame_destination;
-  // transform_rmf_to_fleet(_msg->destination, fleet_frame_destination);
-  // _msg->destination = fleet_frame_destination;
+  rmf_fleet_msgs::msg::Location fleet_frame_destination;
+  transform_rmf_to_fleet(_msg->destination, fleet_frame_destination);
+  _msg->destination = fleet_frame_destination;
 
   messages::LocalizeRequest ff_msg;
   to_ff_message(*(_msg.get()), ff_msg);
