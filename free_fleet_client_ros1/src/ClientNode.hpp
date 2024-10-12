@@ -111,6 +111,7 @@ private:
     // Publisher:
   ros::Publisher cmd_runonce_pub;
   ros::Publisher cmd_brake_pub;
+  ros::Publisher cmd_server_pause_pub;
   ros::Publisher light_status_pub;
   // ros::Publisher cmd_cancel_pub;
   ros::Publisher mode_error_pub;
@@ -165,7 +166,7 @@ private:
   std::atomic<bool> paused;
   std::atomic<bool> docking;
   // std::atomic<bool> is_charging;
-  std::atomic<bool> is_in_charger;
+  // std::atomic<bool> is_in_charger;
   std::atomic<bool> state_runonce;
   // std::atomic<bool> state_brake;
 

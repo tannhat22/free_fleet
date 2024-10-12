@@ -145,7 +145,7 @@ void ClientNode::start(Fields _fields)
   paused = false;
   docking = false;
   // is_charging = false;
-  is_in_charger = false;
+  // is_in_charger = false;
   state_runonce = false;  
   // Publishers:
   // Runonce pub
@@ -155,6 +155,10 @@ void ClientNode::start(Fields _fields)
   // Brake pub
   cmd_brake_pub = node->advertise<std_msgs::Bool>(
     client_node_config.cmd_breaker_topic, 10);
+
+  // Pause from server pub
+  cmd_server_pause_pub = node->advertise<std_msgs::Bool>(
+    "/amr/PAUSE_AMR_FROM_SERVER", 10);
 
   // Light status pub
   light_status_pub = node->advertise<amr_v3_msgs::LightMode>(
@@ -527,12 +531,16 @@ bool ClientNode::read_mode_request()
     {
       ROS_INFO("received a PAUSE command.");
 
-      fields.follow_waypoints_client->cancelAllGoals();
-      WriteLock goal_path_lock(goal_path_mutex);
-      if (!goal_path.empty()) {
-        goal_path[0].sent = false;
-        waypoints_path.sent = false;
-      }
+      // fields.follow_waypoints_client->cancelAllGoals();
+      // WriteLock goal_path_lock(goal_path_mutex);
+      // if (!goal_path.empty()) {
+      //   goal_path[0].sent = false;
+      //   waypoints_path.sent = false;
+      // }
+
+      std_msgs::Bool msg;
+      msg.data = true;
+      cmd_server_pause_pub.publish(msg);
 
       light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_PAUSE);
       paused = true;
@@ -541,8 +549,11 @@ bool ClientNode::read_mode_request()
     else if (mode_request.mode.mode == messages::RobotMode::MODE_MOVING)
     {
       ROS_INFO("received an explicit RESUME command.");
+      std_msgs::Bool msg;
+      msg.data = false;
+      cmd_server_pause_pub.publish(msg);
       light_status_publish(amr_v3_msgs::LightMode::LIGHT_MODE_IDLE);
-      paused = false;
+      // paused = false;
       // emergency = false;
     }
     else if (mode_request.mode.mode == messages::RobotMode::MODE_EMERGENCY)
@@ -1036,11 +1047,11 @@ void ClientNode::handle_requests()
     GoalState current_goal_state = fields.autodock_client->getState();
     if (current_goal_state == GoalState::SUCCEEDED)
     {
-      // Set undock for process next
-      if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_CHARGE) {
-        WriteLock battery_state_lock(battery_state_mutex);
-        is_in_charger = true;  
-      }
+      // // Set undock for process next
+      // if (dock_goal.autodock_goal.mode == dock_goal.autodock_goal.MODE_CHARGE) {
+      //   WriteLock battery_state_lock(battery_state_mutex);
+      //   is_in_charger = true;  
+      // }
 
       ROS_INFO("Autodock goal state: SUCCEEEDED.");
       reset_autodock_goal();
