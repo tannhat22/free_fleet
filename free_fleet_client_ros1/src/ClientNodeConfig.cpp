@@ -88,11 +88,11 @@ void ClientNodeConfig::print_config() const
   printf("  wait timeout intialpose: %.1f\n", wait_timeout_intialpose);
   printf("  update request frequency: %.1f\n", update_frequency);
   printf("  publish state frequency: %.1f\n", publish_frequency);
+  printf("  max speed: %.1f\n", max_speed);
   printf("  maximum distance to first waypoint: %.1f\n", 
       max_dist_to_first_waypoint);
   printf("  TOPICS\n");
   printf("    cmd_runonce: %s\n", cmd_runonce_topic.c_str());
-//   printf("    cmd_cancel: %s\n", cmd_cancel_topic.c_str());
   printf("    cmd_pause: %s\n", cmd_pause_topic.c_str());
   printf("    cmd_reset: %s\n", cmd_reset_topic.c_str());
   printf("    cmd_breaker: %s\n", cmd_breaker_topic.c_str());
@@ -100,7 +100,7 @@ void ClientNodeConfig::print_config() const
   printf("    emergency stop: %s\n", emergency_stop_topic.c_str());
   printf("    battery state: %s\n", battery_state_topic.c_str());
   printf("    floor_name: %s\n", floor_name_topic.c_str());
-  printf("    follow waypoints server: %s\n", follow_waypoints_server_name.c_str());
+  printf("    move base server: %s\n", move_base_server_name.c_str());
   printf("    autodock server: %s\n", autodock_server_name.c_str());
   printf("    localize server: %s\n", localize_server_name.c_str());
   printf("  ROBOT FRAMES\n");
@@ -146,8 +146,6 @@ ClientNodeConfig ClientNodeConfig::make()
       node_private_ns, "level_name", config.level_name);
   config.get_param_if_available(
       node_private_ns, "cmd_runonce_topic", config.cmd_runonce_topic);
-//   config.get_param_if_available(
-//       node_private_ns, "cmd_cancel_topic", config.cmd_cancel_topic);
   config.get_param_if_available(
       node_private_ns, "cmd_pause_topic", config.cmd_pause_topic);
   config.get_param_if_available(
@@ -167,7 +165,7 @@ ClientNodeConfig ClientNodeConfig::make()
   config.get_param_if_available(
       node_private_ns, "robot_frame", config.robot_frame);
   config.get_param_if_available(
-      node_private_ns, "follow_waypoints_server_name", config.follow_waypoints_server_name);
+      node_private_ns, "move_base_server_name", config.move_base_server_name);
   config.get_param_if_available(
       node_private_ns, "autodock_server_name", config.autodock_server_name);
   config.get_param_if_available(
@@ -196,6 +194,8 @@ ClientNodeConfig ClientNodeConfig::make()
       node_private_ns, "update_frequency", config.update_frequency);
   config.get_param_if_available(
       node_private_ns, "publish_frequency", config.publish_frequency);
+  config.get_param_if_available(
+      node_private_ns, "max_speed", config.max_speed);
   config.get_param_if_available(
       node_private_ns, "max_dist_to_first_waypoint", 
       config.max_dist_to_first_waypoint);

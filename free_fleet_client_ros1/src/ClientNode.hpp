@@ -26,6 +26,7 @@
 #include <vector>
 
 #include <ros/ros.h>
+#include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
@@ -38,8 +39,6 @@
 
 #include <amr_v3_autodocking/AutoDockingGoal.h>
 #include <amr_v3_autodocking/AutoDockingAction.h>
-#include <follow_waypoints/FollowWaypointsGoal.h>
-#include <follow_waypoints/FollowWaypointsAction.h>
 #include <move_base_msgs/MoveBaseGoal.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <actionlib/client/simple_action_client.h>
@@ -66,9 +65,10 @@ public:
       actionlib::SimpleActionClient<amr_v3_autodocking::AutoDockingAction>;
   using AutoDockClientSharedPtr = std::shared_ptr<AutoDockClient>;
 
-  using FollowWaypointsClient = 
-      actionlib::SimpleActionClient<follow_waypoints::FollowWaypointsAction>;
-  using FollowWaypointsClientSharedPtr = std::shared_ptr<FollowWaypointsClient>;
+
+  using MoveBaseClient = 
+      actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>;
+  using MoveBaseClientSharedPtr = std::shared_ptr<MoveBaseClient>;
 
   using GoalState = actionlib::SimpleClientGoalState;
 
@@ -81,9 +81,8 @@ public:
     /// Free fleet client
     Client::SharedPtr client;
 
-
-    /// follow waypoints action client
-    FollowWaypointsClientSharedPtr follow_waypoints_client;
+    /// move base action client
+    MoveBaseClientSharedPtr move_base_client;
 
     /// autodock action client
     AutoDockClientSharedPtr autodock_client;
@@ -112,8 +111,9 @@ private:
   ros::Publisher cmd_runonce_pub;
   ros::Publisher cmd_brake_pub;
   ros::Publisher cmd_server_pause_pub;
+  ros::Publisher run_rsc_pub;
+  ros::Publisher speed_limit_pub;
   ros::Publisher light_status_pub;
-  // ros::Publisher cmd_cancel_pub;
   ros::Publisher mode_error_pub;
 
     // Subcriber:
@@ -165,8 +165,6 @@ private:
   std::atomic<bool> hand_control;
   std::atomic<bool> paused;
   std::atomic<bool> docking;
-  // std::atomic<bool> is_charging;
-  // std::atomic<bool> is_in_charger;
   std::atomic<bool> state_runonce;
   // std::atomic<bool> state_brake;
 
@@ -220,12 +218,6 @@ private:
   move_base_msgs::MoveBaseGoal location_to_move_base_goal(
       const messages::Location& location) const;
 
-  follow_waypoints::FollowWaypointsGoal location_to_follow_waypoints_goal(
-      const messages::Location& locations) const;
-
-  follow_waypoints::FollowWaypointsGoal location_to_follow_waypoints_goal(
-      const std::vector<messages::Location>& locations) const;
-
   amr_v3_autodocking::AutoDockingGoal location_to_autodock_goal(
       const messages::Location& locations, const messages::DockMode& _mode,
       const float _distance_go_out, const bool custom_docking, const int16_t _rotate_to_dock,
@@ -243,14 +235,6 @@ private:
     uint32_t aborted_count = 0;
   };
 
-  struct WaypointsGoal 
-  {
-    follow_waypoints::FollowWaypointsGoal follow_waypoints_path;
-    bool sent = false;
-    uint32_t aborted_count = 0;
-    ros::Time goal_end_time;
-  };
-
   struct Goal
   {
     std::string level_name;
@@ -266,7 +250,6 @@ private:
   std::mutex goal_path_mutex;
 
   std::deque<Goal> goal_path;
-  WaypointsGoal waypoints_path;
   
   std::mutex dock_goal_mutex;
   DockGoal dock_goal;
@@ -278,27 +261,17 @@ private:
   void publish_robot_state();
 
   // --------------------------------------------------------------------------
-  // Custom for get feedback follow waypoints
-  void doneCb(const actionlib::SimpleClientGoalState& state,
-              const follow_waypoints::FollowWaypointsResultConstPtr& result);
-
-  void activeCb();
-
-  void feedbackCb(const follow_waypoints::FollowWaypointsFeedbackConstPtr& feedback);
-
-  void reset_waypoints_path();
-
   void reset_autodock_goal();
 
   void cmd_runonce(bool run);
 
   void cmd_brake(bool brake);
 
+  void run_rs_controller(bool run);
+
+  void speed_limit_publish(float speed);
+
   void light_status_publish(uint8_t mode);
-
-  // void undock_charger_before_process();
-
-  // void cmd_cancel(bool cancel);
 
   void error_mode_handle(int32_t error_mode, const std::string& description, bool nolog);
 

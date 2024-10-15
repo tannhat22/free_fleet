@@ -38,7 +38,6 @@ struct ClientNodeConfig
   std::string level_name = "level_name";
 
   std::string cmd_runonce_topic = "state_runonce_nav";
-//   std::string cmd_cancel_topic = "CANCEL_AMR_FROM_SERVER";
   std::string cmd_pause_topic = "PAUSE_AMR";
   std::string cmd_reset_topic = "RESET_AMR";
   std::string cmd_breaker_topic = "cmd_brake";
@@ -51,7 +50,7 @@ struct ClientNodeConfig
   std::string map_frame = "map";
   std::string robot_frame = "base_footprint";
 
-  std::string follow_waypoints_server_name = "follow_waypoints_server";
+  std::string move_base_server_name = "move_base";
   std::string autodock_server_name = "autodock";
   std::string localize_server_name = "localize_server";
 
@@ -70,6 +69,7 @@ struct ClientNodeConfig
   double update_frequency = 10.0;
   double publish_frequency = 1.0;
 
+  double max_speed = 0.7;
   double max_dist_to_first_waypoint = 10.0;
 
   void get_param_if_available(

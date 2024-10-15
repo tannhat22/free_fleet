@@ -337,6 +337,8 @@ void ServerNode::transform_fleet_to_rmf(
 
   _rmf_frame_location.t = _fleet_frame_location.t;
   _rmf_frame_location.level_name = _fleet_frame_location.level_name;
+  _rmf_frame_location.obey_approach_speed_limit = _fleet_frame_location.obey_approach_speed_limit;
+  _rmf_frame_location.approach_speed_limit = _fleet_frame_location.approach_speed_limit;
 }
 
 void ServerNode::transform_rmf_to_fleet(
