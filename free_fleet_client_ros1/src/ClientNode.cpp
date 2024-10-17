@@ -318,6 +318,23 @@ bool ClientNode::get_robot_transform()
   return true;
 }
 
+bool ClientNode::get_robot_odometry()
+{
+  ros::NodeHandle get_odom;
+  boost::shared_ptr<nav_msgs::Odometry const> sharedEdge;
+  sharedEdge = ros::topic::waitForMessage<nav_msgs::Odometry>("/amr/mobile_base_controller/odom", get_odom, 
+                                                          ros::Duration(1.0));
+
+  if (sharedEdge == NULL) {
+    ROS_ERROR("timed out waiting for get odometry!");
+    return false;
+  } else {
+    WriteLock robot_odometry_lock(robot_odometry_mutex);
+    current_robot_odometry = *sharedEdge;
+    return true;
+  }
+}
+
 messages::RobotMode ClientNode::get_robot_mode()
 {
   /// Checks if robot has just received a request that causes an adapter error
@@ -346,11 +363,21 @@ messages::RobotMode ClientNode::get_robot_mode()
 
   /// Checks if robot is moving
   {
-    ReadLock robot_transform_lock(robot_transform_mutex);
+    bool check_moving_transform;
 
-    if (!is_transform_close(
-        current_robot_transform, previous_robot_transform))
-      return messages::RobotMode{messages::RobotMode::MODE_MOVING};
+    {
+      ReadLock robot_transform_lock(robot_transform_mutex);
+      check_moving_transform = is_transform_close(current_robot_transform,
+                                                previous_robot_transform);
+    }
+
+    {
+      ReadLock robot_odometry_lock(robot_odometry_mutex);
+      if ((abs(current_robot_odometry.twist.twist.linear.x) > 0.01 ||
+           abs(current_robot_odometry.twist.twist.angular.z) > 0.01) &&
+          !check_moving_transform) 
+        return messages::RobotMode{messages::RobotMode::MODE_MOVING};
+    }
   }
   
   /// Otherwise, robot is neither charging nor moving,
@@ -1107,6 +1134,8 @@ void ClientNode::update_thread_fn()
     ros::spinOnce();
 
     get_robot_transform();
+
+    get_robot_odometry();
 
     read_requests();
 

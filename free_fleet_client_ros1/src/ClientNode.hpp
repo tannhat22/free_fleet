@@ -33,6 +33,7 @@
 #include <sensor_msgs/BatteryState.h>
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <nav_msgs/Odometry.h>
 #include <amr_v3_msgs/LightMode.h>
 #include <amr_v3_msgs/ErrorStamped.h>
 #include <amr_v3_msgs/ChangeFloor.h>
@@ -153,6 +154,15 @@ private:
   geometry_msgs::TransformStamped previous_robot_transform;
 
   bool get_robot_transform();
+
+  // --------------------------------------------------------------------------
+  // Robot transform handling
+
+  std::mutex robot_odometry_mutex;
+
+  nav_msgs::Odometry current_robot_odometry;
+
+  bool get_robot_odometry();
 
   // --------------------------------------------------------------------------
   // Mode handling
